@@ -1,0 +1,4 @@
+# ESP-IDF default build directory name
+build
+.cache
+compile_commands.json
