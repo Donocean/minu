@@ -6,9 +6,9 @@ extern "C" {
 #endif
 
 /*========================* SCREEN TYPE SETTINGS *=========================*/
-/* chose your screen type by uncomment the macro below */
-#define MINU_DISPLAY_USE_RGB
-// #define MINU_DISPLAY_USE_MONO
+/* chose your color gamut by uncomment the macro below */
+/* #define MINU_DISPLAY_USE_RGB */
+#define MINU_DISPLAY_USE_MONO
 
 /*========================* ITEM NAME SETTINGS *=========================*/
 /* save space in ram but take more space in rom */

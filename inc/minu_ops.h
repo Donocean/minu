@@ -14,11 +14,14 @@ typedef struct
 #ifdef MINU_DISPLAY_USE_RGB
     void (*fillScreen)(uint32_t color);
     void (*setFontColor)(uint32_t color);
-    void (*fillRect)(int16_t x, int16_t y, int16_t w, int16_t h, uint32_t color);
+    void (*fillRect)(int16_t x, int16_t y, uint16_t w, uint16_t h, uint32_t color);
 
 #else
     void (*fillRect)(int16_t x, int16_t y, int16_t w, int16_t h);
 #endif
+
+    void (*drawStr)(int16_t x, int16_t y, const char *str);
+    void (*drawIcon)(int16_t x, int16_t y, uint16_t w, uint16_t h, void *icon);
 
     int8_t (*getFontHeight)(void);
     int8_t (*getFontWeight)(void);

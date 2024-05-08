@@ -13,9 +13,17 @@ extern "C" {
 struct _menu;
 typedef void (*minu_item_cb)(void *para);
 
+typedef struct
+{
+    uint16_t width;
+    uint16_t height;
+    void    *icon;
+} minu_icon_t;
+
 typedef struct _menu_item
 {
     minu_base_t super;
+    /* uint8_t is_hide : 1; */
 
 #ifdef MINU_ITEM_USING_CONST_NAME
     const char *name;
@@ -23,8 +31,8 @@ typedef struct _menu_item
     char name[MINU_ITEM_NAME_SIZE];
 #endif
 
-    minu_item_cb   cb;
-    void          *user_data;
+    minu_item_cb  cb;
+    void         *user_data;
     struct _menu *sub_menu;
 } minu_item_t;
 

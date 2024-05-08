@@ -53,14 +53,14 @@ typedef struct
     uint8_t      font_datum; /* the text plotting alignment(reference datum point) @ref minu_event_id_t */
 } minu_monitor_t;
 
-void               minu_monitor_update(minu_monitor_t *const me);
-void               minu_monitor_init(minu_monitor_t *const me, minu_t *menu, minu_ops_t *ops);
+void minu_monitor_update(minu_monitor_t *const me);
+void minu_monitor_init(minu_monitor_t *const me, minu_t *menu, minu_ops_t *ops);
+void minu_monitor_event_post_to(minu_monitor_t *const me, uint8_t val);
+
 static inline void minu_handle_set_font_datum_alignment(minu_monitor_t *const me, minu_font_datum_t datum)
 {
     me->font_datum = datum;
 }
-
-void minu_monitor_event_post_to(minu_monitor_t *const me, uint8_t val);
 
 #ifdef __cplusplus
 }

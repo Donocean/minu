@@ -1,22 +1,23 @@
 #include "minu_vector.h"
 #include "minu.h"
 #include "minu_conf.h"
+#include "minu_item.h"
 #include <assert.h>
 #include <string.h>
 #include MINU_MEM_CUSTOM_INCLUDE
 
-void minu_vector_init(minu_vector_itme *const me)
+void minu_vector_init(minu_vector_itme_ *const me)
 {
     me->size     = 0;
     me->capacity = 1;
-    me->items    = MINU_MEM_CUSTOM_ALLOC(me->capacity);
+    me->items    = MINU_MEM_CUSTOM_ALLOC(me->capacity * sizeof(minu_item_t));
 }
 
-void minu_vector_push_back(minu_vector_itme *const me, minu_item_t *item)
+void minu_vector_push_back(minu_vector_itme_ *const me, minu_item_t *item)
 {
     if (me->size == me->capacity)
     {
-        minu_item_t *new = MINU_MEM_CUSTOM_ALLOC(me->capacity * 2);
+        minu_item_t *new = MINU_MEM_CUSTOM_ALLOC(me->capacity * 2 * sizeof(minu_item_t));
         assert(new != NULL);
 
         memcpy(new, me->items, sizeof(minu_item_t) * me->size);
@@ -30,7 +31,7 @@ void minu_vector_push_back(minu_vector_itme *const me, minu_item_t *item)
     me->size++;
 }
 
-inline void minu_vector_del(minu_vector_itme *const me)
+inline void minu_vector_del(minu_vector_itme_ *const me)
 {
     MINU_MEM_CUSTOM_FREE(me->items);
 }

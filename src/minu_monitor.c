@@ -20,12 +20,8 @@ void minu_monitor_event_post_to(minu_monitor_t *const me, uint8_t val)
 
 /**
  * @brief get the event from the message queue
- *
- * @param me minu_event_t object
- *
- * @return  @ref minu_event_id_t
  */
-static uint8_t minu_event_get(minu_event_t *const me)
+static uint8_t _get_event(minu_event_t *const me)
 {
     uint8_t ret;
     uint8_t out = me->out & (MINU_EVENT_QUEUE_SIZE - 1);
@@ -57,8 +53,8 @@ void minu_monitor_update(minu_monitor_t *const me)
 {
     assert(me->act_menu != NULL);
 
-    /* get the event. this function can be replaced with rtos queue  */
-    uint8_t evt = minu_event_get(&me->evt);
+    /* get the event. this function can be replaced with rtos queue */
+    uint8_t evt = _get_event(&me->evt);
 
     if (evt == MINU_EVENT_NONE)
         return;
