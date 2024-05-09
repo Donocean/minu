@@ -23,7 +23,7 @@ BUILD_DIR = build
 C_SOURCES =  \
 test.c \
 src/minu.c \
-src/minu_ops.c \
+src/minu_disp.c \
 src/minu_anim.c \
 src/minu_monitor.c \
 src/minu_anim_easing.c \
@@ -59,6 +59,7 @@ C_DEFS =  \
 C_INCLUDES =  \
 -Iinc \
 -Iutils \
+-Iport \
 
 CFLAGS += $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
 

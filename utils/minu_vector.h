@@ -16,7 +16,9 @@ typedef struct
 } minu_vector_itme_;
 
 #define VECTOR_AT(v, i)  ((v).items[i])
+#define PVECTOR_AT(v, i)  ((v)->items[i])
 #define VECTOR_SIZE(v)   ((v).size)
+#define PVECTOR_SIZE(v)   ((v)->size)
 
 void minu_vector_init(minu_vector_itme_ *const me);
 void minu_vector_push_back(minu_vector_itme_ *const me, minu_item_t *item);

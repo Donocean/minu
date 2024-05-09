@@ -35,17 +35,17 @@ static blockLink_t    head, tail;
 #define heapMINIMUM_BLOCK_SIZE ((size_t)(heapSTRUCT_SIZE * 2))
 
 /* Sort every blocks from small to big */
-#define prvInsertBlockIntoFreeList(blockToInsert)                                                                  \
-    do                                                                                                             \
-    {                                                                                                              \
-        blockLink_t *iterator;                                                                                     \
-        size_t       blockSize;                                                                                    \
-        blockSize = blockToInsert->blockSize;                                                                      \
-        for (iterator = &head; iterator->nextFreeBlock->blockSize < blockSize; iterator = iterator->nextFreeBlock) \
-        {                                                                                                          \
-        }                                                                                                          \
-        blockToInsert->nextFreeBlock = iterator->nextFreeBlock;                                                    \
-        iterator->nextFreeBlock      = blockToInsert;                                                              \
+#define insertBlockIntoFreeList(blockToInsert)                                      \
+    do                                                                                 \
+    {                                                                                  \
+        blockLink_t *i;                                                                \
+        size_t       blockSize;                                                        \
+        blockSize = blockToInsert->blockSize;                                          \
+        for (i = &head; i->nextFreeBlock->blockSize < blockSize; i = i->nextFreeBlock) \
+        {                                                                              \
+        }                                                                              \
+        blockToInsert->nextFreeBlock = i->nextFreeBlock;                               \
+        i->nextFreeBlock             = blockToInsert;                                  \
     } while (0)
 
 void *minu_mem_malloc(size_t wantedSize)
@@ -104,7 +104,7 @@ void *minu_mem_malloc(size_t wantedSize)
                     block->blockSize    = wantedSize;
 
                     /* add the splited free block into the free block list */
-                    prvInsertBlockIntoFreeList((newBlock));
+                    insertBlockIntoFreeList((newBlock));
                 }
                 remainingBytes -= block->blockSize;
             }
@@ -127,8 +127,7 @@ void minu_mem_free(void *pv)
 
         ENTER_CRITICAL();
         {
-            /* add the free block into the free block list */
-            prvInsertBlockIntoFreeList(((blockLink_t *)pxLink));
+            insertBlockIntoFreeList(((blockLink_t *)pxLink));
             remainingBytes += pxLink->blockSize;
         }
         EXIT_CRITICAL();

@@ -1,13 +1,13 @@
 #include "minu_monitor.h"
+#include "minu_disp.h"
+#include "minu_vector.h"
 #include <stdint.h>
 #include <assert.h>
 
 /**
  * @brief get the event from the message queue
- *
  * @param me handler object
- *
- * @return  @ref minu_event_id_t
+ * @param val @ref minu_event_id_t minu_event_id_t
  */
 void minu_monitor_event_post_to(minu_monitor_t *const me, uint8_t val)
 {
@@ -20,6 +20,8 @@ void minu_monitor_event_post_to(minu_monitor_t *const me, uint8_t val)
 
 /**
  * @brief get the event from the message queue
+ * @note  this function can be replaced with rtos queue
+ * @return  @ref minu_event_id_t
  */
 static uint8_t _get_event(minu_event_t *const me)
 {
@@ -37,23 +39,32 @@ static uint8_t _get_event(minu_event_t *const me)
 
 static void render(minu_monitor_t *const me)
 {
-    minu_ops_t *ops = &me->ops;
+    minu_t            *menu  = me->act_menu;
+    minu_vector_itme_ *items = &menu->items;
 
-    if (ops->flush)
-        ops->flush();
+    for (uint8_t i = 0; i < PVECTOR_SIZE(items); i++)
+    {
+        uint8_t temp = minu_disp_getFontHeight(me->disp) * i + y;
+
+        minu_disp_drawStr((me->disp, menu->super.x, temp, PVECTOR_AT(items, i).name);
+    }
 }
 
-void minu_monitor_init(minu_monitor_t *const me, minu_t *menu, minu_ops_t *ops)
+/**
+ * @brief let monitor focus on the specific menu
+ *
+ * @param me    monitor object
+ * @param menu  menu to be focused
+ */
+void minu_monitor_focusOn(minu_monitor_t *const me, minu_t *menu)
 {
     me->act_menu = menu;
-    me->ops      = *ops;
 }
 
 void minu_monitor_update(minu_monitor_t *const me)
 {
     assert(me->act_menu != NULL);
 
-    /* get the event. this function can be replaced with rtos queue */
     uint8_t evt = _get_event(&me->evt);
 
     if (evt == MINU_EVENT_NONE)

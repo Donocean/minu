@@ -5,7 +5,7 @@
 
 int main(int argc, char *argv[])
 {
-    minu_t *menu = minu_creat(MINU_TYPE_SELECTOR_VERTICAL, 0, 0, 120, 64);
+    minu_t *menu = minu_creat("test", MINU_TYPE_SELECTOR_VERTICAL, 0, 0, 120, 64);
 
     minu_addItem(menu, "tom", NULL, NULL);
     minu_addItem(menu, "bob", NULL, NULL);

@@ -7,8 +7,8 @@ extern "C" {
 
 #include <stdint.h>
 #include "minu.h"
-#include "minu_ops.h"
 #include "minu_conf.h"
+#include "minu_disp.h"
 
 typedef enum
 {
@@ -22,22 +22,6 @@ typedef enum
     MINU_EVENT_MAX,
 } minu_event_id_t;
 
-typedef enum
-{
-    TL_DATUM, // Top left (default)
-    TC_DATUM, // Top centre
-    TR_DATUM, // Top right
-    ML_DATUM, // Middle left
-    CL_DATUM, // Centre left, same as above
-    MC_DATUM, // Middle centre
-    CC_DATUM, // Centre centre, same as above
-    MR_DATUM, // Middle right
-    CR_DATUM, // Centre right, same as above
-    BL_DATUM, // Bottom left
-    BC_DATUM, // Bottom centre
-    BR_DATUM, // Bottom right
-} minu_font_datum_t;
-
 typedef struct
 {
     uint8_t in;
@@ -48,19 +32,14 @@ typedef struct
 typedef struct
 {
     minu_t      *act_menu;
-    minu_ops_t   ops;
+    minu_disp_t  disp;
     minu_event_t evt;
-    uint8_t      font_datum; /* the text plotting alignment(reference datum point) @ref minu_event_id_t */
 } minu_monitor_t;
 
-void minu_monitor_update(minu_monitor_t *const me);
-void minu_monitor_init(minu_monitor_t *const me, minu_t *menu, minu_ops_t *ops);
+void minu_monitor_focusOn(minu_monitor_t *const me, minu_t *menu);
 void minu_monitor_event_post_to(minu_monitor_t *const me, uint8_t val);
 
-static inline void minu_handle_set_font_datum_alignment(minu_monitor_t *const me, minu_font_datum_t datum)
-{
-    me->font_datum = datum;
-}
+void minu_monitor_update(minu_monitor_t *const me);
 
 #ifdef __cplusplus
 }

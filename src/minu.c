@@ -7,13 +7,14 @@
 #include <assert.h>
 #include MINU_MEM_CUSTOM_INCLUDE
 
-minu_t *minu_creat(uint8_t type, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
+minu_t *minu_creat(const char *title, uint8_t type, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
     minu_t *ret = NULL;
 
     ret = MINU_MEM_CUSTOM_ALLOC(sizeof(minu_t));
     assert(ret != NULL);
 
+    ret->title = title;
     ret->menuType = type;
     ret->is_usingAnim = 1;
     ret->item_index    = 0;
@@ -25,6 +26,16 @@ minu_t *minu_creat(uint8_t type, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
     return ret;
 }
 
+void minu_addItem(minu_t *const me, char *name, minu_item_cb cb, void *user_data)
+{
+    minu_item_t new_item = {0};
+
+    minu_base_set((minu_base_t *)&new_item, me->super.x, me->super.y, me->super.w, me->super.h);
+    minu_item_set(&new_item, name, cb, user_data);
+    minu_vector_push_back(&me->items, &new_item);
+}
+
+
 /* TODO: this function can not delete recursive menu in the items. Maybe I should fix it */
 void minu_delete(minu_t *me)
 {
@@ -32,14 +43,6 @@ void minu_delete(minu_t *me)
     MINU_MEM_CUSTOM_FREE(me);
 }
 
-void minu_addItem(minu_t *const me, char *name, minu_item_cb cb, void *user_data)
-{
-    minu_item_t new_item = {0};
-
-    minu_base_setToZero((minu_base_t *)me);
-    minu_item_set(&new_item, name, cb, user_data);
-    minu_vector_push_back(&me->items, &new_item);
-}
 
 void minu_goNext(minu_t *me)
 {
