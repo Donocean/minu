@@ -49,14 +49,26 @@ static inline void minu_base_set_w(minu_base_t *me, uint16_t w)
 {
     me->w = w;
 }
+
 static inline void minu_base_set_h(minu_base_t *me, uint16_t h)
 {
     me->h = h;
 }
+
 static inline void minu_base_set_size(minu_base_t *me, uint16_t w, uint16_t h)
 {
     me->w = w;
     me->h = h;
+}
+
+static inline minu_base_t minu_base_getAttribute(minu_base_t *const me)
+{
+    minu_base_t ret = {0};
+    ret.w = me->w;
+    ret.h = me->h;
+    ret.x = me->x;
+    ret.y = me->y;
+    return ret;
 }
 
 

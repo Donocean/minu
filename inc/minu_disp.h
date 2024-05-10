@@ -6,29 +6,28 @@ extern "C" {
 #endif
 
 #include <stdint.h>
-#include "minu_port_ops.h"
-
-typedef struct minu_ops_t *minu_disp_t;
+#include "minu_port.h"
 
 #ifdef MINU_DISPLAY_USE_RGB
-
-void minu_disp_fillScreen(const minu_disp_t me, uint32_t color);
-void minu_disp_setFontColor(const minu_disp_t me, uint32_t color);
-void minu_disp_fillRect(const minu_disp_t me, int16_t x, int16_t y, uint16_t w, uint16_t h, uint32_t color);
+/* RGB interface */
+void minu_disp_fillScreen(uint32_t color);
+void minu_disp_setFontColor(uint32_t color);
+void minu_disp_fillRect(int16_t x, int16_t y, uint16_t w, uint16_t h, uint32_t color);
 
 #else
 
-void minu_disp_fillRect(const minu_disp_t me, int16_t x, int16_t y, int16_t w, int16_t h);
+/* MONO interface */
+void minu_disp_fillRectInDiff(int16_t x, int16_t y, int16_t w, int16_t h);
 
 #endif
 
-void     minu_disp_drawStr(const minu_disp_t me, int16_t x, int16_t y, const char *str);
-void     minu_disp_drawIcon(const minu_disp_t me, int16_t x, int16_t y, uint16_t w, uint16_t h, void *icon);
-int8_t   minu_disp_getFontHeight(const minu_disp_t me);
-uint16_t minu_disp_getStrWidth(const minu_disp_t me, char *str);
-void     minu_disp_setFont(const minu_disp_t me, void *font);
-void     minu_disp_setFontDatum(const minu_disp_t me, minu_font_datum_t datum);
-void     minu_disp_flush(const minu_disp_t me);
+void     minu_disp_drawStr(int16_t x, int16_t y, const char *str);
+void     minu_disp_drawIcon(int16_t x, int16_t y, uint16_t w, uint16_t h, void *icon);
+int8_t   minu_disp_getFontHeight(void);
+uint16_t minu_disp_getStrWidth(char *str);
+void     minu_disp_setFont(void *font);
+void     minu_disp_setFontDatum(minu_font_datum_t datum);
+void     minu_disp_flush(void);
 
 #ifdef __cplusplus
 }

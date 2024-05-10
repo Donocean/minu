@@ -15,10 +15,15 @@ typedef struct
     minu_item_t *items;
 } minu_vector_itme_;
 
-#define VECTOR_AT(v, i)  ((v).items[i])
-#define PVECTOR_AT(v, i)  ((v)->items[i])
-#define VECTOR_SIZE(v)   ((v).size)
-#define PVECTOR_SIZE(v)   ((v)->size)
+#define VECTOR_AT(v, i)    ((v).items[i])
+#define VECTOR_SIZE(v)     ((v).size)
+#define VECTOR_BEGIN(v, i) ((v).items[0])
+#define VECTOR_END(v, i)   ((v).items[(v).size - 1])
+
+#define PVECTOR_AT(v, i)    ((v)->items[i])
+#define PVECTOR_SIZE(v)     ((v)->size)
+#define PVECTOR_BEGIN(v, i) ((v)->items[0])
+#define PVECTOR_END(v, i)   ((v).items[(v)->size - 1])
 
 void minu_vector_init(minu_vector_itme_ *const me);
 void minu_vector_push_back(minu_vector_itme_ *const me, minu_item_t *item);

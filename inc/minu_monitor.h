@@ -19,6 +19,7 @@ typedef enum
     MINU_EVENT_RIGHT,
     MINU_EVENT_ENTER,
     MINU_EVENT_BACK,
+    MINU_EVENT_REFRESH,
     MINU_EVENT_MAX,
 } minu_event_id_t;
 
@@ -32,7 +33,6 @@ typedef struct
 typedef struct
 {
     minu_t      *act_menu;
-    minu_disp_t  disp;
     minu_event_t evt;
 } minu_monitor_t;
 
