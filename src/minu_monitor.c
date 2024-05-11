@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 /**
  * @brief get the event from the message queue
@@ -40,27 +41,6 @@ static uint8_t _get_event(minu_event_t *const me)
     return ret;
 }
 
-static void render(minu_monitor_t *const me)
-{
-    minu_t            *menu      = me->act_menu;
-    minu_vector_itme_ *vec_items = &menu->items;
-
-    for (uint8_t i = 0; i < PVECTOR_SIZE(vec_items); i++)
-    {
-        /* int16_t temp = -1 * minu_disp_getFontHeight() * menu->item_index + y; */
-        minu_base_t item_attr = minu_base_getAttribute((minu_base_t *)&PVECTOR_AT(vec_items, i));
-
-        minu_disp_drawStr(item_attr.x + menu->layout.border_gap,
-                          item_attr.y + menu->movingOffset + menu->layout.border_gap,
-                          PVECTOR_AT(vec_items, i).name);
-    }
-
-    /* menu->movingOffset = menu->item_index; */
-
-    minu_disp_fillRectInDiff(menu->selector.x, menu->selector.y, menu->selector.w, menu->selector.h);
-    minu_disp_flush();
-}
-
 /**
  * @brief let monitor focus on the specific menu
  *
@@ -69,14 +49,34 @@ static void render(minu_monitor_t *const me)
  */
 void minu_monitor_focusOn(minu_monitor_t *const me, minu_t *menu)
 {
-    minu_layout_t *layout   = &menu->layout;
-
-    menu->selector.w = minu_disp_getStrWidth(VECTOR_AT(menu->items, 0).name) + layout->border_gap * 2;
-    menu->selector.h = minu_disp_getFontHeight();
-    me->act_menu = menu;
+    me->act_menu     = menu;
+    menu->selector.w = VECTOR_AT(menu->items, 0).super.w;
+    menu->selector.h = VECTOR_AT(menu->items, 0).super.h;
 
     /* refresh the screen */
     minu_monitor_event_post_to(me, MINU_EVENT_REFRESH);
+}
+
+static void render(minu_monitor_t *const me)
+{
+    minu_t            *menu      = me->act_menu;
+    minu_vector_itme_ *vec_items = &menu->items;
+    minu_layout_t     *layout    = &menu->layout;
+
+    for (uint8_t i = 0; i < PVECTOR_SIZE(vec_items); i++)
+    {
+        minu_base_t item_attr = minu_base_getAttribute((minu_base_t *)&PVECTOR_AT(vec_items, i));
+
+        minu_disp_drawStr(item_attr.x + layout->border_gap,
+                          item_attr.y + layout->border_gap + menu->movingOffset,
+                          PVECTOR_AT(vec_items, i).name);
+    }
+
+    minu_disp_fillRectInDiff(menu->selector.x,
+                             menu->selector.y + layout->border_gap,
+                             menu->selector.w + layout->border_gap * 2,
+                             menu->selector.h);
+    minu_disp_flush();
 }
 
 void minu_monitor_update(minu_monitor_t *const me)
@@ -84,12 +84,9 @@ void minu_monitor_update(minu_monitor_t *const me)
     assert(me->act_menu != NULL);
 
     uint8_t evt = _get_event(&me->evt);
-
     if (evt == MINU_EVENT_NONE)
         return;
 
-    minu_t        *menu   = me->act_menu;
-    minu_layout_t *layout = &menu->layout;
     switch (evt)
     {
         case MINU_EVENT_UP:

@@ -6,7 +6,15 @@ extern "C" {
 #endif
 
 #include <stdint.h>
-#include "minu_port.h"
+#include "minu_conf.h"
+
+/* Text plotting alignment(reference datum point) */
+typedef enum
+{
+    TL_DATUM, // Top left(default)
+    ML_DATUM, // Middle left
+    BL_DATUM, // Bottom left
+} minu_font_datum_t;
 
 #ifdef MINU_DISPLAY_USE_RGB
 /* RGB interface */

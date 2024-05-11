@@ -8,22 +8,26 @@ extern "C" {
 #include <stdint.h>
 #include "minu_conf.h"
 
-/* Text plotting alignment(reference datum point) */
-typedef enum
+typedef struct
 {
-    TL_DATUM, // Top left(default)
-    ML_DATUM, // Middle left
-    BL_DATUM, // Bottom left
-} minu_font_datum_t;
+#ifdef MINU_DISPLAY_USE_RGB
+    /* RGB interface */
+    void (*fillScreen)(uint32_t color);
+    void (*setFontColor)(uint32_t color);
+    void (*fillRect)(int16_t x, int16_t y, uint16_t w, uint16_t h, uint32_t color);
+#else
+    /* Monochrome interface */
+    void (*fillRectInDiff)(int16_t x, int16_t y, int16_t w, int16_t h);
+#endif
 
-void     port_fillRectInDiff(int16_t x, int16_t y, int16_t w, int16_t h);
-void     port_drawIcon(int16_t x, int16_t y, uint16_t w, uint16_t h, void *icon);
-int8_t   port_getFontHeight(void);
-uint16_t port_getStrWidth(char *str);
-void     port_setFont(void *font);
-void     port_setFontDatum(minu_font_datum_t datum);
-void     port_drawStr(int16_t x, int16_t y, const char *str);
-void     port_flush(void);
+    void (*drawIcon)(int16_t x, int16_t y, uint16_t w, uint16_t h, void *icon);
+    int8_t (*getFontHeight)(void);
+    uint16_t (*getStrWidth)(char *str);
+    void (*setFont)(void *font);
+    void (*setFontDatum)(uint8_t datum);
+    void (*drawStr)(int16_t x, int16_t y, const char *str);
+    void (*flush)(void);
+} minu_ops_t;
 
 /* Note: Please call these function after the specific UI library has been initialized! */
 void minu_port_new_disp_u8g2(void *u8g2_obj);
