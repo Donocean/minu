@@ -23,6 +23,8 @@ static uint16_t port_getStrWidth(char *str);
 static int8_t   port_getFontHeight(void);
 static void     port_drawIcon(int16_t x, int16_t y, uint16_t w, uint16_t h, void *icon);
 static void     port_fillRectInDiff(int16_t x, int16_t y, int16_t w, int16_t h);
+static void     port_drawHLine(int16_t x, int16_t y, uint16_t len);
+static void     port_drawVLine(int16_t x, int16_t y, uint16_t len);
 
 /* Note: call this function after the u8g2 has been initialized! */
 void minu_port_new_disp_u8g2(void *u8g2_obj)
@@ -41,6 +43,8 @@ void minu_port_new_disp_u8g2(void *u8g2_obj)
     ops->fillRectInDiff = port_fillRectInDiff;
     ops->getStrWidth    = port_getStrWidth;
     ops->getFontHeight  = port_getFontHeight;
+    ops->drawHLine      = port_drawHLine;
+    ops->drawVLine      = port_drawVLine;
 
     port_setFontDatum(TL_DATUM);
     minu_disp_set(ops);
@@ -84,6 +88,16 @@ static void port_setFontDatum(uint8_t datum)
 static void port_drawStr(int16_t x, int16_t y, const char *str)
 {
     u8g2_DrawStr(port_u8g2, x, y, str);
+}
+
+static void port_drawHLine(int16_t x, int16_t y, uint16_t len)
+{
+    u8g2_DrawHLine(port_u8g2, x, y, len);
+}
+
+static void port_drawVLine(int16_t x, int16_t y, uint16_t len)
+{
+    u8g2_DrawVLine(port_u8g2, x, y, len);
 }
 
 static void port_flush(void)

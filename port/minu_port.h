@@ -25,6 +25,8 @@ typedef struct
     uint16_t (*getStrWidth)(char *str);
     void (*setFont)(void *font);
     void (*setFontDatum)(uint8_t datum);
+    void (*drawHLine)(int16_t x, int16_t y, uint16_t len);
+    void (*drawVLine)(int16_t x, int16_t y, uint16_t len);
     void (*drawStr)(int16_t x, int16_t y, const char *str);
     void (*flush)(void);
 } minu_ops_t;

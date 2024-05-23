@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
 /**
  * @brief get the event from the message queue
@@ -63,19 +64,34 @@ static void render(minu_monitor_t *const me)
     minu_vector_itme_ *vec_items = &menu->items;
     minu_layout_t     *layout    = &menu->layout;
 
+    minu_base_t menu_attr = minu_base_getAttribute((minu_base_t *)menu);
+
+    /* draw all the items in the screen */
     for (uint8_t i = 0; i < PVECTOR_SIZE(vec_items); i++)
     {
-        minu_base_t item_attr = minu_base_getAttribute((minu_base_t *)&PVECTOR_AT(vec_items, i));
+        minu_base_t item_attr  = minu_base_getAttribute((minu_base_t *)&PVECTOR_AT(vec_items, i));
+        uint16_t    item_tar_x = item_attr.x + layout->border_gap;
+        uint16_t    item_tar_y = item_attr.y + layout->border_gap + menu->movingOffset;
 
-        minu_disp_drawStr(item_attr.x + layout->border_gap,
-                          item_attr.y + layout->border_gap + menu->movingOffset,
-                          PVECTOR_AT(vec_items, i).name);
+        /* check if the item is in the menu's area */
+        if (item_tar_y > menu_attr.y && item_tar_y <= (menu_attr.y + menu_attr.h))
+        {
+            minu_disp_drawStr(item_tar_x, item_tar_y, PVECTOR_AT(vec_items, i).name);
+        }
     }
 
+    /* draw selector */
     minu_disp_fillRectInDiff(menu->selector.x,
                              menu->selector.y + layout->border_gap,
                              menu->selector.w + layout->border_gap * 2,
                              menu->selector.h);
+
+    // draw progress bar
+    minu_disp_drawHLine(menu_attr.w - LIST_BAR_W, 0, LIST_BAR_W); // draw bar width
+    minu_disp_drawHLine(menu_attr.w - LIST_BAR_W, DISP_H - 1, LIST_BAR_W); // draw bar height
+    minu_disp_drawVLine(menu_attr.w - ceil((float)LIST_BAR_W / 2), 0, DISP_H);
+    minu_disp_drawBox(menu_attr.w - LIST_BAR_W, 0, LIST_BAR_W, list.bar_y);
+
     minu_disp_flush();
 }
 

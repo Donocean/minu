@@ -30,6 +30,8 @@ void minu_disp_fillRectInDiff(int16_t x, int16_t y, int16_t w, int16_t h);
 #endif
 
 void     minu_disp_drawStr(int16_t x, int16_t y, const char *str);
+void     minu_disp_drawHLine(int16_t x, int16_t y, uint16_t len);
+void     minu_disp_drawVLine(int16_t x, int16_t y, uint16_t len);
 void     minu_disp_drawIcon(int16_t x, int16_t y, uint16_t w, uint16_t h, void *icon);
 int8_t   minu_disp_getFontHeight(void);
 uint16_t minu_disp_getStrWidth(char *str);

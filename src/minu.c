@@ -88,19 +88,21 @@ void minu_goNext(minu_t *me)
     }
     menu_attr = minu_base_getAttribute((minu_base_t *)me);
     item_attr = minu_base_getAttribute((minu_base_t *)&VECTOR_AT(me->items, me->item_index));
-    offset_y  = item_attr.y + item_attr.h + me->movingOffset;
 
+    /* y coordinates of the currently selected item */
+    offset_y = item_attr.y + item_attr.h + me->movingOffset;
+    /* if item's position is within the area of the menu, make selector jump to the item's position */
     if (offset_y > menu_attr.y && offset_y <= (menu_attr.y + menu_attr.h))
         me->selector.y = item_attr.y + me->movingOffset;
     else
     {
-        /* let selector back to the first item position */
+        /* make selector back to the first item position */
         if (me->is_loopItem && me->item_index == 0)
         {
             me->selector.y   = item_attr.y;
             me->movingOffset = 0;
         }
-        else
+        else /* selector should remain in place. just making item move */
             me->movingOffset -= font_h + layout->u.item_gap;
     }
     me->selector.w = item_attr.w;
@@ -127,19 +129,22 @@ void minu_goPrevious(minu_t *me)
     }
     menu_attr = minu_base_getAttribute((minu_base_t *)me);
     item_attr = minu_base_getAttribute((minu_base_t *)&VECTOR_AT(me->items, me->item_index));
-    offset_y  = item_attr.y + item_attr.h + me->movingOffset;
 
+    /* y coordinates of the currently selected item */
+    offset_y = item_attr.y + item_attr.h + me->movingOffset;
+    /* if the position of selected item is within the area of the menu, make selector jump to the item's position */
     if (offset_y > menu_attr.y && offset_y <= (menu_attr.y + menu_attr.h))
         me->selector.y = item_attr.y + me->movingOffset;
     else
     {
+        /* if is_loopItem, make selector back to the last item */
         if (me->is_loopItem && me->item_index == (VECTOR_SIZE(me->items) - 1))
         {
             uint8_t last_pos = menu_attr.h / (font_h + layout->u.item_gap) - 1;
             me->selector.y   = menu_attr.y + last_pos * (font_h + layout->u.item_gap);
             me->movingOffset = -1 * (item_attr.y - me->selector.y);
         }
-        else
+        else /* selector should remain in place. just making item move */
             me->movingOffset += font_h + layout->u.item_gap;
     }
     me->selector.w = item_attr.w;
