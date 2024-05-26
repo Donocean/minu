@@ -36,13 +36,19 @@ void minu_disp_fillRect(int16_t x, int16_t y, uint16_t w, uint16_t h, uint32_t c
 
 #else
 
+void minu_disp_fillRect(int16_t x, int16_t y, uint16_t w, uint16_t h)
+{
+    assert(g_ops != NULL);
+    g_ops->fillRect(x, y, w, h);
+}
+
+#endif
+
 void minu_disp_fillRectInDiff(int16_t x, int16_t y, int16_t w, int16_t h)
 {
     assert(g_ops != NULL);
     g_ops->fillRectInDiff(x, y, w, h);
 }
-
-#endif
 
 void minu_disp_drawStr(int16_t x, int16_t y, const char *str)
 {
@@ -84,12 +90,12 @@ void minu_disp_setFontDatum(minu_font_datum_t datum)
 void minu_disp_drawHLine(int16_t x, int16_t y, uint16_t len)
 {
     assert(g_ops != NULL);
-    g_ops->drawHLine(x,y,len);
+    g_ops->drawHLine(x, y, len);
 }
 void minu_disp_drawVLine(int16_t x, int16_t y, uint16_t len)
 {
     assert(g_ops != NULL);
-    g_ops->drawVLine(x,y,len);
+    g_ops->drawVLine(x, y, len);
 }
 
 /* This function is used to send the buffer to the screen. Don't need to set it if you don't use it */

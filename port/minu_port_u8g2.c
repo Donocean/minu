@@ -22,6 +22,7 @@ static void     port_setFont(void *font);
 static uint16_t port_getStrWidth(char *str);
 static int8_t   port_getFontHeight(void);
 static void     port_drawIcon(int16_t x, int16_t y, uint16_t w, uint16_t h, void *icon);
+static void port_fillRect(int16_t x, int16_t y, uint16_t w, uint16_t h);
 static void     port_fillRectInDiff(int16_t x, int16_t y, int16_t w, int16_t h);
 static void     port_drawHLine(int16_t x, int16_t y, uint16_t len);
 static void     port_drawVLine(int16_t x, int16_t y, uint16_t len);
@@ -40,6 +41,7 @@ void minu_port_new_disp_u8g2(void *u8g2_obj)
     ops->setFont        = port_setFont;
     ops->drawIcon       = port_drawIcon;
     ops->setFontDatum   = port_setFontDatum;
+    ops->fillRect       = port_fillRect;
     ops->fillRectInDiff = port_fillRectInDiff;
     ops->getStrWidth    = port_getStrWidth;
     ops->getFontHeight  = port_getFontHeight;
@@ -50,10 +52,16 @@ void minu_port_new_disp_u8g2(void *u8g2_obj)
     minu_disp_set(ops);
 }
 
+static void port_fillRect(int16_t x, int16_t y, uint16_t w, uint16_t h)
+{
+    u8g2_DrawBox(port_u8g2, x, y, w, h);
+}
+
 static void port_fillRectInDiff(int16_t x, int16_t y, int16_t w, int16_t h)
 {
     u8g2_SetDrawColor(port_u8g2, 2);
     u8g2_DrawRBox(port_u8g2, x, y, w, h, 2);
+    u8g2_SetDrawColor(port_u8g2, 1);
 }
 
 static void port_drawIcon(int16_t x, int16_t y, uint16_t w, uint16_t h, void *icon)

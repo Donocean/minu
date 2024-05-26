@@ -30,6 +30,7 @@ typedef struct
         uint8_t item_gap;
     } u;
     uint8_t border_gap;
+    uint8_t progress_bar_width;
 } minu_layout_t;
 
 typedef struct _menu minu_t;
@@ -41,10 +42,11 @@ struct _menu
     const char       *title;
     minu_t           *cotainer_menu;
 
+    /* for graph */
     minu_layout_t layout;
     minu_base_t   selector;
-
     int16_t movingOffset;
+
     uint8_t item_index;
     uint8_t menuType     : 3; /* @ref enum minu_type_t */
     uint8_t is_usingAnim : 1;

@@ -7,7 +7,6 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <math.h>
 
 /**
  * @brief get the event from the message queue
@@ -87,10 +86,25 @@ static void render(minu_monitor_t *const me)
                              menu->selector.h);
 
     // draw progress bar
-    minu_disp_drawHLine(menu_attr.w - LIST_BAR_W, 0, LIST_BAR_W); // draw bar width
-    minu_disp_drawHLine(menu_attr.w - LIST_BAR_W, DISP_H - 1, LIST_BAR_W); // draw bar height
-    minu_disp_drawVLine(menu_attr.w - ceil((float)LIST_BAR_W / 2), 0, DISP_H);
-    minu_disp_drawBox(menu_attr.w - LIST_BAR_W, 0, LIST_BAR_W, list.bar_y);
+    int16_t bar_offseted_x = menu_attr.x + menu_attr.w;
+    // draw bar top width
+    minu_disp_drawHLine(bar_offseted_x - menu->layout.progress_bar_width, menu_attr.y, menu->layout.progress_bar_width);
+    // draw bar bottom width
+    minu_disp_drawHLine(bar_offseted_x - menu->layout.progress_bar_width,
+                        menu_attr.y + menu_attr.h - 1,
+                        menu->layout.progress_bar_width);
+    // draw bar height
+    minu_disp_drawVLine(bar_offseted_x - (menu->layout.progress_bar_width / 2 + 1), menu_attr.y, menu_attr.h);
+
+    // items count from 0
+    uint8_t item_size      = PVECTOR_SIZE(vec_items) - 1;
+    int16_t h_per_progress = menu_attr.h / item_size;
+    int16_t progress       = menu->item_index != item_size ? menu->item_index * h_per_progress : menu_attr.h;
+
+    minu_disp_fillRect(bar_offseted_x - menu->layout.progress_bar_width,
+                       menu_attr.y,
+                       menu->layout.progress_bar_width,
+                       progress);
 
     minu_disp_flush();
 }

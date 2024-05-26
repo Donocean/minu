@@ -17,9 +17,10 @@ typedef struct
     void (*fillRect)(int16_t x, int16_t y, uint16_t w, uint16_t h, uint32_t color);
 #else
     /* Monochrome interface */
-    void (*fillRectInDiff)(int16_t x, int16_t y, int16_t w, int16_t h);
+    void (*fillRect)(int16_t x, int16_t y, uint16_t w, uint16_t h);
 #endif
 
+    void (*fillRectInDiff)(int16_t x, int16_t y, int16_t w, int16_t h);
     void (*drawIcon)(int16_t x, int16_t y, uint16_t w, uint16_t h, void *icon);
     int8_t (*getFontHeight)(void);
     uint16_t (*getStrWidth)(char *str);

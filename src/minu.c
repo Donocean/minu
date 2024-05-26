@@ -12,6 +12,7 @@ static void minu_setLayoutDefault(minu_t *const me)
 {
     me->layout.border_gap = 2;
     me->layout.u.item_gap = 0;
+    me->layout.progress_bar_width = 5;
 }
 
 minu_t *minu_creat(const char *title, uint8_t type, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
