@@ -131,6 +131,9 @@ void minu_monitor_update(minu_monitor_t *const me)
         case MINU_EVENT_BACK:
             minu_goIn(&me->act_menu);
             break;
+        case MINU_EVENT_DELETE:
+            minu_goIn(&me->act_menu);
+            break;
         default:
             break;
     }

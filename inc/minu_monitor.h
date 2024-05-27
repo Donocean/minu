@@ -20,6 +20,7 @@ typedef enum
     MINU_EVENT_ENTER,
     MINU_EVENT_BACK,
     MINU_EVENT_REFRESH,
+    MINU_EVENT_DELETE,
     MINU_EVENT_MAX,
 } minu_event_id_t;
 

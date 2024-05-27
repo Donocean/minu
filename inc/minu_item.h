@@ -23,7 +23,7 @@ typedef struct
 typedef struct _menu_item
 {
     minu_base_t super;
-    /* uint8_t is_hide : 1; */
+    uint8_t     is_hide : 1;
 
 #ifdef MINU_ITEM_USING_CONST_NAME
     const char *name;
@@ -36,7 +36,7 @@ typedef struct _menu_item
     struct _menu *sub_menu;
 } minu_item_t;
 
-static inline void minu_item_setName(minu_item_t *me, char *name)
+static inline void minu_item_setName(minu_item_t *const me, char *name)
 {
 #ifdef MINU_ITEM_USING_CONST_NAME
     me->name = name;
@@ -44,15 +44,16 @@ static inline void minu_item_setName(minu_item_t *me, char *name)
     memcpy(me->name, name, strlen(name) + 1);
 #endif
 }
-static inline void minu_item_setCb(minu_item_t *me, minu_item_cb cb)
+static inline void minu_item_setCb(minu_item_t *const me, minu_item_cb cb)
 {
     me->cb = cb;
 }
-static inline void minu_item_setData(minu_item_t *me, void *data)
+static inline void minu_item_setData(minu_item_t *const me, void *data)
 {
     me->user_data = data;
 }
-static inline void minu_item_set(minu_item_t *me, char *name, minu_item_cb cb, void *user_data)
+
+static inline void minu_item_set(minu_item_t *const me, char *name, minu_item_cb cb, void *user_data)
 {
     minu_item_setName(me, name);
     minu_item_setCb(me, cb);

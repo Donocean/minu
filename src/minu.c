@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <assert.h>
+#include <sys/queue.h>
 #include MINU_MEM_CUSTOM_INCLUDE
 
 static void minu_setLayoutDefault(minu_t *const me)
@@ -87,6 +88,7 @@ void minu_goNext(minu_t *me)
         else
             me->item_index = VECTOR_SIZE(me->items) - 1;
     }
+
     menu_attr = minu_base_getAttribute((minu_base_t *)me);
     item_attr = minu_base_getAttribute((minu_base_t *)&VECTOR_AT(me->items, me->item_index));
 
@@ -177,4 +179,13 @@ void minu_goOut(minu_t **act_menu)
         return;
 
     *act_menu = me->cotainer_menu;
+}
+
+void minu_deleteItem(minu_t *me)
+{
+    assert(VECTOR_SIZE(me->items) != 0);
+
+    minu_item_t *item  = &VECTOR_AT(me->items, me->item_index);
+
+    item->is_hide = 1;
 }
