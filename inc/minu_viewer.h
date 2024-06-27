@@ -1,5 +1,5 @@
-#ifndef __MINU_MONITOR_H_
-#define __MINU_MONITOR_H_
+#ifndef __MINU_VIEWER_H_
+#define __MINU_VIEWER_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,15 +35,15 @@ typedef struct
 {
     minu_t      *act_menu;
     minu_event_t evt;
-} minu_monitor_t;
+} minu_viewer_t;
 
-void minu_monitor_focusOn(minu_monitor_t *const me, minu_t *menu);
-void minu_monitor_event_post_to(minu_monitor_t *const me, uint8_t val);
+void minu_viewer_focusOn(minu_viewer_t *const me, minu_t *menu);
+void minu_viewer_event_post_to(minu_viewer_t *const me, uint8_t val);
 
-void minu_monitor_update(minu_monitor_t *const me);
+void minu_viewer_update(minu_viewer_t *const me);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __MINU_MONITOR_H_ */
+#endif /* __MINU_VIEWER_H_ */

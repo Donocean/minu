@@ -15,62 +15,45 @@ typedef struct
     uint16_t h;
 } minu_base_t;
 
-static inline void minu_base_setToZero(minu_base_t *me)
+#define MINU_GET_SUPER(x) &((x).super)
+
+static inline void minu_base_setAttribute(void *me, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
-    me->x = 0;
-    me->y = 0;
-    me->w = 0;
-    me->h = 0;
+    minu_base_t *pme = me;
+
+    pme->x = x;
+    pme->y = y;
+    pme->w = w;
+    pme->h = h;
 }
 
-static inline void minu_base_set(minu_base_t *me, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
+static inline void minu_base_set_pos(void *me, uint16_t x, uint16_t y)
 {
-    me->x = x;
-    me->y = y;
-    me->w = w;
-    me->h = h;
+    minu_base_t *pme = me;
+
+    pme->x = x;
+    pme->y = y;
 }
 
-static inline void minu_base_set_x(minu_base_t *me, uint16_t x)
+static inline void minu_base_set_size(void *me, uint16_t w, uint16_t h)
 {
-    me->x = x;
-}
-static inline void minu_base_set_y(minu_base_t *me, uint16_t y)
-{
-    me->y = y;
-}
-static inline void minu_base_set_pos(minu_base_t *me, uint16_t x, uint16_t y)
-{
-    me->x = x;
-    me->y = y;
+    minu_base_t *pme = me;
+
+    pme->w = w;
+    pme->h = h;
 }
 
-static inline void minu_base_set_w(minu_base_t *me, uint16_t w)
-{
-    me->w = w;
-}
-
-static inline void minu_base_set_h(minu_base_t *me, uint16_t h)
-{
-    me->h = h;
-}
-
-static inline void minu_base_set_size(minu_base_t *me, uint16_t w, uint16_t h)
-{
-    me->w = w;
-    me->h = h;
-}
-
-static inline minu_base_t minu_base_getAttribute(minu_base_t *const me)
+static inline minu_base_t minu_base_getAttribute(void *me)
 {
     minu_base_t ret = {0};
-    ret.w = me->w;
-    ret.h = me->h;
-    ret.x = me->x;
-    ret.y = me->y;
+    minu_base_t *pme = me;
+    ret.w = pme->w;
+    ret.h = pme->h;
+    ret.x = pme->x;
+    ret.y = pme->y;
+
     return ret;
 }
-
 
 #ifdef __cplusplus
 }

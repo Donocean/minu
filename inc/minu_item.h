@@ -44,6 +44,7 @@ static inline void minu_item_setName(minu_item_t *const me, char *name)
     memcpy(me->name, name, strlen(name) + 1);
 #endif
 }
+
 static inline void minu_item_setCb(minu_item_t *const me, minu_item_cb cb)
 {
     me->cb = cb;

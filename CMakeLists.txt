@@ -1,7 +1,7 @@
 set(src src/minu.c
         src/minu_disp.c
         src/minu_anim.c
-        src/minu_monitor.c
+        src/minu_viewer.c
         src/minu_anim_easing.c
         utils/minu_mem.c
         utils/minu_vector.c
