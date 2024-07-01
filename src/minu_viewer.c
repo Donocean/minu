@@ -59,6 +59,70 @@ static uint8_t _get_event(minu_event_t *const me)
     return ret;
 }
 
+static void update_selector(minu_t *me)
+{
+    static uint8_t last_index = 0;
+
+    minu_base_t tar_sel;
+    int16_t font_h, offset_y;
+    minu_base_t item_attr, menu_attr;
+    minu_layout_t *layout = &me->layout;
+
+    /* didn't move the index of the selector */
+    if (last_index == me->item_index)
+        return;
+
+    font_h = minu_disp_getFontHeight();
+    menu_attr = minu_base_getAttr(me);
+    item_attr = minu_base_getAttr(&VECTOR_AT(me->items, me->item_index));
+
+    /* y end coordinates of the current selected item */
+    offset_y = item_attr.y + item_attr.h + me->movingOffset;
+
+    /* if the position of selected item is within the area of the menu, make
+     * selector jump to the item's position */
+    if (offset_y > menu_attr.y && offset_y <= (menu_attr.y + menu_attr.h))
+        tar_sel.y = item_attr.y + me->movingOffset;
+    else
+    {
+        /* selector should remain in place. just making item move */
+        tar_sel.y = me->selector.y;
+        if (me->item_index - last_index > 0)
+            me->movingOffset -= font_h + layout->u.item_gap; /* move down */
+        else
+            me->movingOffset += font_h + layout->u.item_gap; /* move up */
+
+        if (me->is_loopItem)
+        {
+            if (me->item_index == 0)
+            {
+                /* make selector back to the first item position */
+                tar_sel.y = item_attr.y;
+                me->movingOffset = 0;
+            }
+            else if (me->item_index == (VECTOR_SIZE(me->items) - 1))
+            {
+                /* make selector back to the final item */
+                uint8_t end = menu_attr.h / (font_h + layout->u.item_gap) - 1;
+                tar_sel.y = menu_attr.y + end * (font_h + layout->u.item_gap);
+                me->movingOffset = -1 * (item_attr.y - tar_sel.y);
+            }
+        }
+    }
+    tar_sel.x = item_attr.x;
+    tar_sel.w = item_attr.w;
+    tar_sel.h = item_attr.h;
+    me->selector = tar_sel;
+
+    last_index = me->item_index;
+
+    ESP_LOGI("test",
+             "r_y = %d s_y = %d m_y =%d\n",
+             offset_y,
+             me->selector.y,
+             me->movingOffset);
+}
+
 static void draw_selector(minu_t *menu)
 {
     minu_disp_fillRectInDiff(menu->selector.x,
@@ -69,7 +133,7 @@ static void draw_selector(minu_t *menu)
 
 static void draw_progress_bar(minu_t *menu)
 {
-    minu_base_t menu_attr = minu_base_getAttribute(menu);
+    minu_base_t menu_attr = minu_base_getAttr(menu);
     int16_t bar_offseted_x = menu_attr.x + menu_attr.w;
 
     // draw bar top width
@@ -100,79 +164,20 @@ static void draw_progress_bar(minu_t *menu)
                        progress);
 }
 
-static void update_selector(minu_t *me)
-{
-    static uint8_t last_index = 0;
-
-    int8_t font_h;
-    int16_t offset_y;
-    minu_base_t item_attr, menu_attr;
-    minu_layout_t *layout = &me->layout;
-
-    /* didn't move the index of the selector */
-    if (last_index == me->item_index)
-        return;
-
-    font_h = minu_disp_getFontHeight();
-    menu_attr = minu_base_getAttribute(me);
-    item_attr = minu_base_getAttribute(&VECTOR_AT(me->items, me->item_index));
-
-    /* y coordinates of the currently selected item */
-    offset_y = item_attr.y + item_attr.h + me->movingOffset;
-
-    /* if the position of selected item is within the area of the menu, make
-     * selector jump to the item's position */
-    if (offset_y > menu_attr.y && offset_y <= (menu_attr.y + menu_attr.h))
-        me->selector.y = item_attr.y + me->movingOffset;
-    else
-    {
-        /* selector should remain in place. just making item move */
-        if (me->item_index - last_index > 0)
-            me->movingOffset -= font_h + layout->u.item_gap; /* move down */
-        else
-            me->movingOffset += font_h + layout->u.item_gap; /* move up */
-
-        if (me->is_loopItem)
-        {
-            if (me->item_index == 0)
-            {
-                /* make selector back to the first item position */
-                me->selector.y = item_attr.y;
-                me->movingOffset = 0;
-            }
-            else if (me->item_index == (VECTOR_SIZE(me->items) - 1))
-            {
-                /* make selector back to the last item */
-                uint8_t last_pos =
-                    menu_attr.h / (font_h + layout->u.item_gap) - 1;
-                me->selector.y =
-                    menu_attr.y + last_pos * (font_h + layout->u.item_gap);
-                me->movingOffset = -1 * (item_attr.y - me->selector.y);
-            }
-        }
-    }
-    me->selector.w = item_attr.w;
-    last_index = me->item_index;
-
-    ESP_LOGD("test",
-             "\nr_y = %d s_y = %d m_y =%d\n",
-             offset_y,
-             me->selector.y,
-             me->movingOffset);
-}
-
 static void viewer_render(minu_viewer_t *const me)
 {
     minu_t *menu = me->act_menu;
-    minu_base_t menu_attr = minu_base_getAttribute(menu);
+    minu_base_t menu_attr = minu_base_getAttr(menu);
+
+    update_selector(menu);
 
     /* draw all the items in the screen */
     for (uint8_t i = 0; i < VECTOR_SIZE(menu->items); i++)
     {
         minu_base_t item_attr;
         uint16_t item_tar_x, item_tar_y;
-        item_attr = minu_base_getAttribute(&VECTOR_AT(menu->items, i));
 
+        item_attr = minu_base_getAttr(&VECTOR_AT(menu->items, i));
         item_tar_x = item_attr.x + menu->layout.border_gap;
         item_tar_y = item_attr.y + menu->layout.border_gap + menu->movingOffset;
 
@@ -180,9 +185,8 @@ static void viewer_render(minu_viewer_t *const me)
         if (item_tar_y > menu_attr.y &&
             item_tar_y <= (menu_attr.y + menu_attr.h))
         {
-            minu_disp_drawStr(item_tar_x,
-                              item_tar_y,
-                              VECTOR_AT(menu->items, i).name);
+            const char *item_name = VECTOR_AT(menu->items, i).name;
+            minu_disp_drawStr(item_tar_x, item_tar_y, item_name);
         }
     }
 
@@ -194,6 +198,10 @@ static void viewer_render(minu_viewer_t *const me)
 
     // flush buffer to the screen
     minu_disp_flush();
+}
+
+void minu_dispatch(minu_viewer_t *const me, uint16_t e)
+{
 }
 
 void minu_viewer_update(minu_viewer_t *const me)
@@ -215,7 +223,7 @@ void minu_viewer_update(minu_viewer_t *const me)
         case MINU_EVENT_ENTER:
             minu_goIn(&me->act_menu);
             break;
-        case MINU_EVENT_BACK:
+        case MINU_EVENT_QUIT:
             minu_goOut(&me->act_menu);
             break;
         case MINU_EVENT_DELETE:
@@ -224,8 +232,6 @@ void minu_viewer_update(minu_viewer_t *const me)
         default:
             break;
     }
-
-    update_selector(me->act_menu);
 
     viewer_render(me);
 }

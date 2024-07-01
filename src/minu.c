@@ -38,7 +38,7 @@ minu_t *minu_creat(const char *title,
 
     minu_setLayoutDefault(ret);
     /* set menu attributes */
-    minu_base_setAttribute(ret, x, y, w, h);
+    minu_base_setAttr(ret, x, y, w, h);
     /* set selector attributes */
     minu_base_set_pos(&ret->selector, x, y);
 
@@ -60,7 +60,7 @@ void minu_addItem(minu_t *const me,
     x = me->super.x;
     y = me->super.y + (h + layout->u.item_gap) * VECTOR_SIZE(me->items);
 
-    minu_base_setAttribute(&new_item, x, y, w, h);
+    minu_base_setAttr(&new_item, x, y, w, h);
     minu_item_set(&new_item, name, cb, user_data);
     minu_vector_push_back(&me->items, &new_item);
 }
@@ -90,11 +90,6 @@ void minu_setLayout(minu_t *const me, minu_layout_t *layout)
 {
     me->layout.u.item_gap = layout->u.item_gap;
     me->layout.border_gap = layout->border_gap;
-}
-
-void minu_loopItem_on_off(minu_t *const me, bool enable)
-{
-    me->is_loopItem = enable;
 }
 
 /* TODO: this function can not delete recursive menu in the items. Maybe I
@@ -127,9 +122,7 @@ void minu_goPrevious(minu_t *me)
     if (me->item_index-- == 0)
     {
         if (me->is_loopItem)
-        {
             me->item_index = VECTOR_SIZE(me->items) - 1;
-        }
         else
             me->item_index = 0;
     }

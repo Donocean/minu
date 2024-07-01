@@ -53,11 +53,25 @@ struct _menu
     uint8_t is_loopItem  : 1;
 };
 
-minu_t *minu_creat(const char *title, uint8_t type, uint16_t x, uint16_t y, uint16_t w, uint16_t h);
+minu_t *minu_creat(const char *title,
+                   uint8_t type,
+                   uint16_t x,
+                   uint16_t y,
+                   uint16_t w,
+                   uint16_t h);
+
+void minu_addItem(minu_t *const me,
+                  char *name,
+                  minu_item_cb cb,
+                  void *user_data);
+
 void minu_delete(minu_t *me);
-void minu_addItem(minu_t *const me, char *name, minu_item_cb cb, void *user_data);
 void minu_setLayout(minu_t *const me, minu_layout_t *layout);
-void minu_loopItem_on_off(minu_t *const me, bool enable);
+
+static inline void minu_loopItem_on_off(minu_t *const me, bool enable)
+{
+    me->is_loopItem = enable;
+}
 
 void minu_goNext(minu_t *me);
 void minu_goPrevious(minu_t *me);
