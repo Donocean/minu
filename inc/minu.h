@@ -38,7 +38,7 @@ struct _menu
 {
     minu_base_t super;
 
-    minu_vector_itme_ items;
+    minu_vector_itme_t items;
     const char *title;
     minu_t *cotainer_menu;
 

@@ -13,7 +13,7 @@ typedef struct
     uint16_t     size;
     uint16_t     capacity;
     minu_item_t *items;
-} minu_vector_itme_;
+} minu_vector_itme_t;
 
 #define VECTOR_AT(v, i)    ((v).items[i])
 #define VECTOR_SIZE(v)     ((v).size)
@@ -25,9 +25,11 @@ typedef struct
 #define PVECTOR_BEGIN(v, i) ((v)->items[0])
 #define PVECTOR_END(v, i)   ((v).items[(v)->size - 1])
 
-void minu_vector_init(minu_vector_itme_ *const me);
-void minu_vector_push_back(minu_vector_itme_ *const me, minu_item_t *item);
-void minu_vector_del(minu_vector_itme_ *const me);
+void minu_vector_init(minu_vector_itme_t *const me);
+void minu_vector_push_back(minu_vector_itme_t *const me, minu_item_t *item);
+void minu_vector_erase(minu_vector_itme_t *const me, uint16_t index);
+void minu_vector_pop_back(minu_vector_itme_t *const me);
+void minu_vector_del(minu_vector_itme_t *const me);
 
 #ifdef __cplusplus
 }

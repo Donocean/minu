@@ -154,11 +154,18 @@ void minu_goOut(minu_t **act_menu)
     *act_menu = me->cotainer_menu;
 }
 
+// TODO: occurs bugs when remaining 2 items
 void minu_deleteItem(minu_t *me)
 {
     assert(VECTOR_SIZE(me->items) != 0);
 
-    minu_item_t *item = &VECTOR_AT(me->items, me->item_index);
+    /* modfiy every items position */
+    for (uint16_t i = VECTOR_SIZE(me->items) - 1; i > me->item_index; i--)
+    {
+        minu_item_t *now = &VECTOR_AT(me->items, i);
+        minu_base_t prev_pos = minu_base_getAttr(&VECTOR_AT(me->items, i - 1));
+        minu_base_set_pos(now, prev_pos.x, prev_pos.y);
+    }
 
-    item->is_hide = 1;
+    minu_vector_erase(&me->items, me->item_index);
 }

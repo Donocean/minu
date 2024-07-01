@@ -7,6 +7,8 @@ extern "C" {
 
 #include <stdint.h>
 
+// TODO: add animation support within the base class
+
 typedef struct
 {
     uint16_t x;
@@ -27,6 +29,11 @@ static inline void minu_base_setAttr(void *me,
     ((minu_base_t *)me)->y = y;
     ((minu_base_t *)me)->w = w;
     ((minu_base_t *)me)->h = h;
+}
+
+static inline void minu_base_setAttrWith(void *dest, void *src)
+{
+    *((minu_base_t *)dest) = *((minu_base_t *)src);
 }
 
 static inline void minu_base_set_pos(void *me, uint16_t x, uint16_t y)

@@ -10,7 +10,6 @@ extern "C" {
 #include "minu_conf.h"
 #include "minu_disp.h"
 
-
 typedef enum
 {
     MINU_EVENT_NONE,
@@ -25,27 +24,12 @@ typedef enum
     MINU_EVENT_MAX,
 } minu_event_id_t;
 
-typedef struct
-{
-    uint8_t in;
-    uint8_t out;
-    uint8_t buf[MINU_EVENT_QUEUE_SIZE]; /* @ref minu_event_id_t */
-} minu_event_t;
+typedef struct minu_viewer_t *minu_viewer_handle_t;
 
-typedef struct minu_viewer minu_viewer_t;
-typedef uint16_t (*minu_stateHandler)(minu_viewer_t *me, minu_event_id_t e);
+minu_viewer_handle_t minu_viewer_create(minu_t *menu);
 
-struct minu_viewer
-{
-    minu_stateHandler state;
-    minu_t      *act_menu;
-    minu_event_t evt;
-};
-
-void minu_viewer_focusOn(minu_viewer_t *const me, minu_t *menu);
-void minu_viewer_event_post_to(minu_viewer_t *const me, uint8_t val);
-
-void minu_viewer_update(minu_viewer_t *const me);
+void minu_viewer_update(minu_viewer_handle_t me);
+void minu_viewer_event_post_to(minu_viewer_handle_t me, minu_event_id_t e);
 
 #ifdef __cplusplus
 }

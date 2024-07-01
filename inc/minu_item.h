@@ -23,7 +23,6 @@ typedef struct
 typedef struct _menu_item
 {
     minu_base_t super;
-    uint8_t     is_hide : 1;
 
 #ifdef MINU_ITEM_USING_CONST_NAME
     const char *name;
