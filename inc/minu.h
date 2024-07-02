@@ -28,7 +28,7 @@ typedef struct
     {
         uint8_t icon_gap;
         uint8_t item_gap;
-    } u;
+    };
     uint8_t border_gap;
     uint8_t bar_width;
 } minu_layout_t;
@@ -47,7 +47,7 @@ struct _menu
     minu_base_t selector;
     int16_t movingOffset;
 
-    uint8_t item_index;
+    int16_t item_index; /* -1 means there is nothing in the items vector */
     uint8_t menuType     : 3; /* @ref enum minu_type_t */
     uint8_t is_usingAnim : 1;
     uint8_t is_loopItem  : 1;

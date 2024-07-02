@@ -45,9 +45,60 @@ struct minu_viewer_t
 
 #define TRAN_STATE(target) (me->state = (target), STATUS_TRAN)
 
-static state_t viewer_handleMenu(minu_viewer_t *me, minu_event_id_t e);
-static state_t viewer_handleItem(minu_viewer_t *me, minu_event_id_t e);
+static state_t viewer_handleMenu(minu_viewer_t *me, minu_event_id_t e)
+{
+    state_t status = STATUS_IGNORED;
+    minu_t *menu = me->act_menu;
 
+    if (VECTOR_SIZE(menu->items) == 0)
+        return status;
+
+    switch ((uint8_t)e)
+    {
+        case EVENT_STATE_ENTRY:
+            break;
+        case EVENT_STATE_EXIT:
+            break;
+
+        case MINU_EVENT_UP:
+            minu_goPrevious(menu);
+            break;
+        case MINU_EVENT_DOWN:
+            minu_goNext(menu);
+            break;
+        case MINU_EVENT_ENTER:
+            minu_goIn(&menu);
+            break;
+        case MINU_EVENT_QUIT:
+            minu_goOut(&menu);
+            break;
+        case MINU_EVENT_DELETE:
+            minu_deleteItem(menu);
+            break;
+        default:
+            status = STATUS_IGNORED;
+            break;
+    }
+
+    return status;
+}
+
+static state_t viewer_handleItem(minu_viewer_t *me, minu_event_id_t e)
+{
+    state_t status = STATUS_IGNORED;
+
+    switch ((uint8_t)e)
+    {
+        case EVENT_STATE_ENTRY:
+            break;
+        case EVENT_STATE_EXIT:
+            break;
+        default:
+            break;
+    }
+
+    return status;
+}
 
 /**
  * @brief get the event from the message queue
@@ -88,7 +139,6 @@ minu_viewer_handle_t minu_viewer_create(minu_t *menu)
     return ret;
 }
 
-
 /**
  * @brief get the event from the message queue
  * @note  this function can be replaced with rtos queue
@@ -110,16 +160,15 @@ static uint8_t _get_event(minu_event_t *const me)
 
 static void update_selector(minu_t *me)
 {
-    static uint8_t last_index = 0;
+    static int16_t last_index = 0;
 
     minu_base_t tar_sel;
     int16_t font_h, offset_y;
     minu_base_t item_attr, menu_attr;
     minu_layout_t *layout = &me->layout;
 
-    /* didn't move the index of the selector */
-    /* if (last_index == me->item_index) */
-    /*     return; */
+    if (VECTOR_SIZE(me->items) == 0)
+        return;
 
     font_h = minu_disp_getFontHeight();
     menu_attr = minu_base_getAttr(me);
@@ -128,8 +177,8 @@ static void update_selector(minu_t *me)
     /* y end coordinates of the current selected item */
     offset_y = item_attr.y + item_attr.h + me->movingOffset;
 
-    /* if the position of selected item is within the area of the menu, make
-     * selector jump to the item's position */
+    /* if the position of selected item is within the area of the menu,
+     * make selector jump to the item's position */
     if (offset_y > menu_attr.y && offset_y <= (menu_attr.y + menu_attr.h))
         tar_sel.y = item_attr.y + me->movingOffset;
     else
@@ -137,9 +186,9 @@ static void update_selector(minu_t *me)
         /* selector should remain in place. just making item move */
         tar_sel.y = me->selector.y;
         if (me->item_index - last_index > 0)
-            me->movingOffset -= font_h + layout->u.item_gap; /* move down */
+            me->movingOffset -= font_h + layout->item_gap; /* move down */
         else
-            me->movingOffset += font_h + layout->u.item_gap; /* move up */
+            me->movingOffset += font_h + layout->item_gap; /* move up */
 
         if (me->is_loopItem)
         {
@@ -152,8 +201,8 @@ static void update_selector(minu_t *me)
             else if (me->item_index == (VECTOR_SIZE(me->items) - 1))
             {
                 /* make selector back to the final item */
-                uint8_t end = menu_attr.h / (font_h + layout->u.item_gap) - 1;
-                tar_sel.y = menu_attr.y + end * (font_h + layout->u.item_gap);
+                uint8_t end_idx = menu_attr.h / (font_h + layout->item_gap) - 1;
+                tar_sel.y = menu_attr.y + end_idx * (font_h + layout->item_gap);
                 me->movingOffset = -1 * (item_attr.y - tar_sel.y);
             }
         }
@@ -161,15 +210,18 @@ static void update_selector(minu_t *me)
     tar_sel.x = item_attr.x;
     tar_sel.w = item_attr.w;
     tar_sel.h = item_attr.h;
-    me->selector = tar_sel;
+    minu_base_setAttrWith(&me->selector, &tar_sel);
 
-    last_index = me->item_index;
-
-    ESP_LOGI("test",
-             "r_y = %d s_y = %d m_y =%d\n",
+    ESP_LOGI("",
+             "off_y=%d, sel_y=%d, move_off=%d, i=%d, last_i=%d, size: %d\n",
              offset_y,
              me->selector.y,
-             me->movingOffset);
+             me->movingOffset,
+             me->item_index,
+             last_index,
+             VECTOR_SIZE(me->items));
+
+    last_index = me->item_index;
 }
 
 static void draw_selector(minu_t *menu)
@@ -201,10 +253,10 @@ static void draw_progress_bar(minu_t *menu)
                         menu_attr.h);
 
     // items count from 0
-    uint8_t item_size = VECTOR_SIZE(menu->items) - 1;
-    int16_t h_per_progress = menu_attr.h / item_size;
-    int16_t progress = menu->item_index != item_size
-                           ? menu->item_index * h_per_progress
+    uint8_t item_size = VECTOR_SIZE(menu->items);
+    int16_t h_per_progress = item_size ? menu_attr.h / item_size : 0;
+    int16_t progress = (menu->item_index + 1) != item_size
+                           ? (menu->item_index + 1) * h_per_progress
                            : menu_attr.h;
 
     minu_disp_fillRect(bar_offseted_x - menu->layout.bar_width,
@@ -265,57 +317,6 @@ static void state_dispatch(minu_viewer_t *me, uint16_t e)
     }
 }
 
-static state_t viewer_handleMenu(minu_viewer_t *me, minu_event_id_t e)
-{
-    state_t status = STATUS_IGNORED;
-
-    switch ((uint8_t)e)
-    {
-        case EVENT_STATE_ENTRY:
-            break;
-        case EVENT_STATE_EXIT:
-            break;
-
-        case MINU_EVENT_UP:
-            minu_goPrevious(me->act_menu);
-            break;
-        case MINU_EVENT_DOWN:
-            minu_goNext(me->act_menu);
-            break;
-        case MINU_EVENT_ENTER:
-            minu_goIn(&me->act_menu);
-            break;
-        case MINU_EVENT_QUIT:
-            minu_goOut(&me->act_menu);
-            break;
-        case MINU_EVENT_DELETE:
-            minu_deleteItem(me->act_menu);
-            break;
-        default:
-            status = STATUS_IGNORED;
-            break;
-    }
-
-    return status;
-}
-
-static state_t viewer_handleItem(minu_viewer_t *me, minu_event_id_t e)
-{
-    state_t status = STATUS_IGNORED;
-
-    switch ((uint8_t)e)
-    {
-        case EVENT_STATE_ENTRY:
-            break;
-        case EVENT_STATE_EXIT:
-            break;
-        default:
-            break;
-    }
-
-    return status;
-}
-
 void minu_viewer_update(minu_viewer_handle_t me)
 {
     assert(me->act_menu != NULL);
@@ -330,4 +331,3 @@ void minu_viewer_update(minu_viewer_handle_t me)
     /* for graph */
     viewer_render(me);
 }
-

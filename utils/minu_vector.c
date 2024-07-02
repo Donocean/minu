@@ -43,6 +43,13 @@ void minu_vector_erase(minu_vector_itme_t *const me, uint16_t index)
     int remain = me->size - index - 1;
     minu_item_t *del_item = &me->items[index];
 
+    /* last remove last item */
+    if (!remain)
+    {
+        minu_vector_pop_back(me);
+        return;
+    }
+
     memcpy(del_item, &me->items[index + 1], sizeof(minu_item_t) * remain);
 
     me->size--;

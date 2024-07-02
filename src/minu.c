@@ -11,7 +11,7 @@
 static void minu_setLayoutDefault(minu_t *const me)
 {
     me->layout.border_gap = 2;
-    me->layout.u.item_gap = 0;
+    me->layout.item_gap = 0;
     me->layout.bar_width = 5;
 }
 
@@ -58,7 +58,7 @@ void minu_addItem(minu_t *const me,
     h = minu_disp_getFontHeight();
 
     x = me->super.x;
-    y = me->super.y + (h + layout->u.item_gap) * VECTOR_SIZE(me->items);
+    y = me->super.y + (h + layout->item_gap) * VECTOR_SIZE(me->items);
 
     minu_base_setAttr(&new_item, x, y, w, h);
     minu_item_set(&new_item, name, cb, user_data);
@@ -88,7 +88,7 @@ void minu_addItem(minu_t *const me,
  */
 void minu_setLayout(minu_t *const me, minu_layout_t *layout)
 {
-    me->layout.u.item_gap = layout->u.item_gap;
+    me->layout.item_gap = layout->item_gap;
     me->layout.border_gap = layout->border_gap;
 }
 
@@ -107,9 +107,7 @@ void minu_goNext(minu_t *me)
     if (++me->item_index == VECTOR_SIZE(me->items))
     {
         if (me->is_loopItem)
-        {
             me->item_index = 0;
-        }
         else
             me->item_index = VECTOR_SIZE(me->items) - 1;
     }
@@ -159,6 +157,12 @@ void minu_deleteItem(minu_t *me)
 {
     assert(VECTOR_SIZE(me->items) != 0);
 
+    uint8_t is_end = 0;
+
+    /* is last item? */
+    if (me->item_index == (VECTOR_SIZE(me->items) - 1))
+        is_end = 1;
+
     /* modfiy every items position */
     for (uint16_t i = VECTOR_SIZE(me->items) - 1; i > me->item_index; i--)
     {
@@ -167,5 +171,10 @@ void minu_deleteItem(minu_t *me)
         minu_base_set_pos(now, prev_pos.x, prev_pos.y);
     }
 
+    /* this function will modfiy vector size, therefore we need variable 'is_end' */
     minu_vector_erase(&me->items, me->item_index);
+
+    if (is_end)
+        me->item_index--;
 }
+
