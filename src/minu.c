@@ -15,8 +15,8 @@ static void minu_setLayoutDefault(minu_t *const me)
     me->layout.bar_width = 5;
 }
 
-minu_t *minu_creat(const char *title,
-                   uint8_t type,
+minu_t *minu_creat(uint8_t type,
+                   const char *title,
                    uint16_t x,
                    uint16_t y,
                    uint16_t w,
@@ -39,13 +39,12 @@ minu_t *minu_creat(const char *title,
     minu_setLayoutDefault(ret);
     /* set menu attributes */
     minu_base_setAttr(ret, x, y, w, h);
-    /* set selector attributes */
-    minu_base_set_pos(&ret->selector, x, y);
 
     return ret;
 }
 
 void minu_addItem(minu_t *const me,
+                  minu_item_type_t type,
                   char *name,
                   minu_item_cb cb,
                   void *user_data)
@@ -107,7 +106,10 @@ void minu_goNext(minu_t *me)
     if (++me->item_index == VECTOR_SIZE(me->items))
     {
         if (me->is_loopItem)
+        {
             me->item_index = 0;
+            me->is_loopItem |= 1 << 7;
+        }
         else
             me->item_index = VECTOR_SIZE(me->items) - 1;
     }
@@ -120,7 +122,10 @@ void minu_goPrevious(minu_t *me)
     if (me->item_index-- == 0)
     {
         if (me->is_loopItem)
+        {
             me->item_index = VECTOR_SIZE(me->items) - 1;
+            me->is_loopItem |= 1 << 6;
+        }
         else
             me->item_index = 0;
     }
@@ -152,7 +157,6 @@ void minu_goOut(minu_t **act_menu)
     *act_menu = me->cotainer_menu;
 }
 
-// TODO: occurs bugs when remaining 2 items
 void minu_deleteItem(minu_t *me)
 {
     assert(VECTOR_SIZE(me->items) != 0);
@@ -168,13 +172,13 @@ void minu_deleteItem(minu_t *me)
     {
         minu_item_t *now = &VECTOR_AT(me->items, i);
         minu_base_t prev_pos = minu_base_getAttr(&VECTOR_AT(me->items, i - 1));
-        minu_base_set_pos(now, prev_pos.x, prev_pos.y);
+        minu_base_setPos(now, prev_pos.x, prev_pos.y);
     }
 
-    /* this function will modfiy vector size, therefore we need variable 'is_end' */
+    /* this function will modfiy vector size,
+     * therefore we need to record is_end */
     minu_vector_erase(&me->items, me->item_index);
 
     if (is_end)
         me->item_index--;
 }
-

@@ -13,11 +13,20 @@ extern "C" {
 struct _menu;
 typedef void (*minu_item_cb)(void *para);
 
+typedef enum
+{
+    MINU_ITEM_TYPE_SUBMENU,
+    MINU_ITEM_TYPE_VARIABLE,
+    MINU_ITEM_TYPE_CHECKBOX,
+    MINU_ITEM_TYPE_POPWINDOW,
+
+} minu_item_type_t;
+
 typedef struct
 {
     uint16_t width;
     uint16_t height;
-    void    *icon;
+    void *icon;
 } minu_icon_t;
 
 typedef struct _menu_item
@@ -30,35 +39,16 @@ typedef struct _menu_item
     char name[MINU_ITEM_NAME_SIZE];
 #endif
 
-    minu_item_cb  cb;
-    void         *user_data;
+    minu_item_cb cb;
+    void *user_data;
     struct _menu *sub_menu;
 } minu_item_t;
 
-static inline void minu_item_setName(minu_item_t *const me, char *name)
-{
-#ifdef MINU_ITEM_USING_CONST_NAME
-    me->name = name;
-#else
-    memcpy(me->name, name, strlen(name) + 1);
-#endif
-}
-
-static inline void minu_item_setCb(minu_item_t *const me, minu_item_cb cb)
-{
-    me->cb = cb;
-}
-static inline void minu_item_setData(minu_item_t *const me, void *data)
-{
-    me->user_data = data;
-}
-
-static inline void minu_item_set(minu_item_t *const me, char *name, minu_item_cb cb, void *user_data)
-{
-    minu_item_setName(me, name);
-    minu_item_setCb(me, cb);
-    minu_item_setData(me, user_data);
-}
+void minu_item_setName(minu_item_t *const me, char *name);
+void minu_item_set(minu_item_t *const me,
+                   char *name,
+                   minu_item_cb cb,
+                   void *user_data);
 
 #ifdef __cplusplus
 }

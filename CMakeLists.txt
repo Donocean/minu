@@ -1,4 +1,5 @@
 set(src src/minu.c
+        src/minu_item.c
         src/minu_disp.c
         src/minu_anim.c
         src/minu_viewer.c

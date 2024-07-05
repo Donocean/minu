@@ -41,14 +41,15 @@ struct minu_viewer_t
     stateHandler state;
     minu_t *act_menu;
     minu_event_t evt;
+    minu_base_t selector;
 };
 
 #define TRAN_STATE(target) (me->state = (target), STATUS_TRAN)
 
 static state_t viewer_handleMenu(minu_viewer_t *me, minu_event_id_t e)
 {
-    state_t status = STATUS_IGNORED;
     minu_t *menu = me->act_menu;
+    state_t status = STATUS_IGNORED;
 
     if (VECTOR_SIZE(menu->items) == 0)
         return status;
@@ -122,12 +123,10 @@ void minu_viewer_event_post_to(minu_viewer_handle_t me, minu_event_id_t e)
 minu_viewer_handle_t minu_viewer_create(minu_t *menu)
 {
     minu_viewer_handle_t ret;
+    minu_base_t first_attr = minu_base_getAttr(&VECTOR_BEGIN(menu->items));
 
     ret = MINU_MEM_CUSTOM_ALLOC(sizeof(minu_viewer_t));
     assert(ret != NULL);
-
-    menu->selector.w = VECTOR_AT(menu->items, 0).super.w;
-    menu->selector.h = VECTOR_AT(menu->items, 0).super.h;
 
     ret->act_menu = menu;
     ret->state = viewer_handleMenu;
@@ -135,6 +134,9 @@ minu_viewer_handle_t minu_viewer_create(minu_t *menu)
 
     /* refresh the screen */
     minu_viewer_event_post_to(ret, MINU_EVENT_REFRESH);
+
+    /* set selector's attribute */
+    minu_base_setAttrWith(&ret->selector, &first_attr);
 
     return ret;
 }
@@ -158,53 +160,54 @@ static uint8_t _get_event(minu_event_t *const me)
     return ret;
 }
 
-static void update_selector(minu_t *me)
+static void update_selector(minu_viewer_t *me)
 {
     static int16_t last_index = 0;
 
     minu_base_t tar_sel;
     int16_t font_h, offset_y;
     minu_base_t item_attr, menu_attr;
-    minu_layout_t *layout = &me->layout;
 
-    if (VECTOR_SIZE(me->items) == 0)
+    minu_t *menu = me->act_menu;
+    minu_layout_t *layout = &me->act_menu->layout;
+
+    if (VECTOR_SIZE(menu->items) == 0)
         return;
 
     font_h = minu_disp_getFontHeight();
-    menu_attr = minu_base_getAttr(me);
-    item_attr = minu_base_getAttr(&VECTOR_AT(me->items, me->item_index));
+    menu_attr = minu_base_getAttr(menu);
+    item_attr = minu_base_getAttr(&VECTOR_AT(menu->items, menu->item_index));
 
     /* y end coordinates of the current selected item */
-    offset_y = item_attr.y + item_attr.h + me->movingOffset;
+    offset_y = item_attr.y + item_attr.h + menu->movingOffset;
 
     /* if the position of selected item is within the area of the menu,
      * make selector jump to the item's position */
     if (offset_y > menu_attr.y && offset_y <= (menu_attr.y + menu_attr.h))
-        tar_sel.y = item_attr.y + me->movingOffset;
+        tar_sel.y = item_attr.y + menu->movingOffset;
     else
     {
         /* selector should remain in place. just making item move */
         tar_sel.y = me->selector.y;
-        if (me->item_index - last_index > 0)
-            me->movingOffset -= font_h + layout->item_gap; /* move down */
+        if (menu->item_index - last_index > 0)
+            menu->movingOffset -= font_h + layout->item_gap; /* move down */
         else
-            me->movingOffset += font_h + layout->item_gap; /* move up */
+            menu->movingOffset += font_h + layout->item_gap; /* move up */
 
-        if (me->is_loopItem)
+        if (menu->is_loopItem & 0x80)
         {
-            if (me->item_index == 0)
-            {
-                /* make selector back to the first item position */
-                tar_sel.y = item_attr.y;
-                me->movingOffset = 0;
-            }
-            else if (me->item_index == (VECTOR_SIZE(me->items) - 1))
-            {
-                /* make selector back to the final item */
-                uint8_t end_idx = menu_attr.h / (font_h + layout->item_gap) - 1;
-                tar_sel.y = menu_attr.y + end_idx * (font_h + layout->item_gap);
-                me->movingOffset = -1 * (item_attr.y - tar_sel.y);
-            }
+            /* make selector back to the first item position */
+            tar_sel.y = item_attr.y;
+            menu->movingOffset = 0;
+            menu->is_loopItem &= ~0x80;
+        }
+        else if (menu->is_loopItem & 0x40)
+        {
+            /* make selector back to the final item */
+            uint8_t end_idx = menu_attr.h / (font_h + layout->item_gap) - 1;
+            tar_sel.y = menu_attr.y + end_idx * (font_h + layout->item_gap);
+            menu->movingOffset = -1 * (item_attr.y - tar_sel.y);
+            menu->is_loopItem &= ~0x40;
         }
     }
     tar_sel.x = item_attr.x;
@@ -216,20 +219,21 @@ static void update_selector(minu_t *me)
              "off_y=%d, sel_y=%d, move_off=%d, i=%d, last_i=%d, size: %d\n",
              offset_y,
              me->selector.y,
-             me->movingOffset,
-             me->item_index,
+             menu->movingOffset,
+             menu->item_index,
              last_index,
-             VECTOR_SIZE(me->items));
+             VECTOR_SIZE(menu->items));
 
-    last_index = me->item_index;
+    last_index = menu->item_index;
 }
 
-static void draw_selector(minu_t *menu)
+static void draw_selector(minu_viewer_t *me)
 {
-    minu_disp_fillRectInDiff(menu->selector.x,
-                             menu->selector.y + menu->layout.border_gap,
-                             menu->selector.w + menu->layout.border_gap * 2,
-                             menu->selector.h);
+    minu_disp_fillRectInDiff(me->selector.x,
+                             me->selector.y + me->act_menu->layout.border_gap,
+                             me->selector.w +
+                                 me->act_menu->layout.border_gap * 2,
+                             me->selector.h);
 }
 
 static void draw_progress_bar(minu_t *menu)
@@ -270,7 +274,7 @@ static void viewer_render(minu_viewer_t *me)
     minu_t *menu = me->act_menu;
     minu_base_t menu_attr = minu_base_getAttr(menu);
 
-    update_selector(menu);
+    update_selector(me);
 
     /* draw all the items in the screen */
     for (uint8_t i = 0; i < VECTOR_SIZE(menu->items); i++)
@@ -292,7 +296,7 @@ static void viewer_render(minu_viewer_t *me)
     }
 
     /* draw selector */
-    draw_selector(menu);
+    draw_selector(me);
 
     // draw progress bar
     draw_progress_bar(menu);
