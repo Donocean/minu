@@ -10,8 +10,8 @@
 
 static void minu_setLayoutDefault(minu_t *const me)
 {
-    me->layout.border_gap = 2;
     me->layout.item_gap = 0;
+    me->layout.border_gap = 2;
     me->layout.bar_width = 5;
 }
 
@@ -29,9 +29,8 @@ minu_t *minu_creat(uint8_t type,
 
     ret->title = title;
     ret->menuType = type;
-    ret->is_usingAnim = 1;
     ret->item_index = 0;
-    ret->movingOffset = 0;
+    ret->is_usingAnim = 1;
     ret->cotainer_menu = NULL;
 
     minu_vector_init(&ret->items);

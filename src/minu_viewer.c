@@ -42,6 +42,11 @@ struct minu_viewer_t
     minu_t *act_menu;
     minu_event_t evt;
     minu_base_t selector;
+    struct
+    {
+        uint16_t x;
+        uint16_t y;
+    } offset;
 };
 
 #define TRAN_STATE(target) (me->state = (target), STATUS_TRAN)
@@ -131,6 +136,7 @@ minu_viewer_handle_t minu_viewer_create(minu_t *menu)
     ret->act_menu = menu;
     ret->state = viewer_handleMenu;
     ret->state(ret, EVENT_STATE_ENTRY);
+    ret->offset.x = ret->offset.y = 0;
 
     /* refresh the screen */
     minu_viewer_event_post_to(ret, MINU_EVENT_REFRESH);
@@ -160,71 +166,52 @@ static uint8_t _get_event(minu_event_t *const me)
     return ret;
 }
 
-static void update_selector(minu_viewer_t *me)
+static void viewer_updateOffsetWindow(minu_viewer_t *me)
 {
-    static int16_t last_index = 0;
-
-    minu_base_t tar_sel;
-    int16_t font_h, offset_y;
+    int new_offset_x, new_offset_y;
+    int16_t item_edge_x, item_edge_y;
     minu_base_t item_attr, menu_attr;
 
     minu_t *menu = me->act_menu;
-    minu_layout_t *layout = &me->act_menu->layout;
+    new_offset_x = me->offset.x;
+    new_offset_y = me->offset.y;
+    menu_attr = minu_base_getAttr(menu);
+    item_attr = minu_base_getAttr(&VECTOR_AT(menu->items, menu->item_index));
+
+    item_edge_x = item_attr.x + item_attr.w;
+    item_edge_y = item_attr.y + item_attr.h;
+
+    if (item_edge_y > (new_offset_y + menu_attr.h))
+        new_offset_y = item_edge_y - menu_attr.h;
+    else if (item_attr.y < new_offset_y)
+        new_offset_y = item_attr.y;
+
+    me->offset.x = new_offset_x;
+    me->offset.y = new_offset_y;
+}
+
+static void viewer_updateSelector(minu_viewer_t *me)
+{
+    minu_base_t tar_sel;
+    minu_base_t item_attr;
+    minu_t *menu = me->act_menu;
 
     if (VECTOR_SIZE(menu->items) == 0)
         return;
 
-    font_h = minu_disp_getFontHeight();
-    menu_attr = minu_base_getAttr(menu);
     item_attr = minu_base_getAttr(&VECTOR_AT(menu->items, menu->item_index));
 
-    /* y end coordinates of the current selected item */
-    offset_y = item_attr.y + item_attr.h + menu->movingOffset;
-
-    /* if the position of selected item is within the area of the menu,
-     * make selector jump to the item's position */
-    if (offset_y > menu_attr.y && offset_y <= (menu_attr.y + menu_attr.h))
-        tar_sel.y = item_attr.y + menu->movingOffset;
-    else
-    {
-        /* selector should remain in place. just making item move */
-        tar_sel.y = me->selector.y;
-        if (menu->item_index - last_index > 0)
-            menu->movingOffset -= font_h + layout->item_gap; /* move down */
-        else
-            menu->movingOffset += font_h + layout->item_gap; /* move up */
-
-        if (menu->is_loopItem & 0x80)
-        {
-            /* make selector back to the first item position */
-            tar_sel.y = item_attr.y;
-            menu->movingOffset = 0;
-            menu->is_loopItem &= ~0x80;
-        }
-        else if (menu->is_loopItem & 0x40)
-        {
-            /* make selector back to the final item */
-            uint8_t end_idx = menu_attr.h / (font_h + layout->item_gap) - 1;
-            tar_sel.y = menu_attr.y + end_idx * (font_h + layout->item_gap);
-            menu->movingOffset = -1 * (item_attr.y - tar_sel.y);
-            menu->is_loopItem &= ~0x40;
-        }
-    }
+    tar_sel.y = item_attr.y - me->offset.y;
     tar_sel.x = item_attr.x;
     tar_sel.w = item_attr.w;
     tar_sel.h = item_attr.h;
     minu_base_setAttrWith(&me->selector, &tar_sel);
 
     ESP_LOGI("",
-             "off_y=%d, sel_y=%d, move_off=%d, i=%d, last_i=%d, size: %d\n",
-             offset_y,
+             "select_y=%d, offset_y=%d, i=%d\n",
              me->selector.y,
-             menu->movingOffset,
-             menu->item_index,
-             last_index,
-             VECTOR_SIZE(menu->items));
-
-    last_index = menu->item_index;
+             me->offset.y,
+             menu->item_index);
 }
 
 static void draw_selector(minu_viewer_t *me)
@@ -274,7 +261,8 @@ static void viewer_render(minu_viewer_t *me)
     minu_t *menu = me->act_menu;
     minu_base_t menu_attr = minu_base_getAttr(menu);
 
-    update_selector(me);
+    viewer_updateOffsetWindow(me);
+    viewer_updateSelector(me);
 
     /* draw all the items in the screen */
     for (uint8_t i = 0; i < VECTOR_SIZE(menu->items); i++)
@@ -284,7 +272,7 @@ static void viewer_render(minu_viewer_t *me)
 
         item_attr = minu_base_getAttr(&VECTOR_AT(menu->items, i));
         item_tar_x = item_attr.x + menu->layout.border_gap;
-        item_tar_y = item_attr.y + menu->layout.border_gap + menu->movingOffset;
+        item_tar_y = item_attr.y + menu->layout.border_gap - me->offset.y;
 
         /* check if the item is in the menu's area */
         if (item_tar_y > menu_attr.y &&

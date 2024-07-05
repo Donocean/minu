@@ -40,7 +40,6 @@ struct _menu
 
     /* for graph */
     minu_layout_t layout;
-    int16_t movingOffset;
 
     uint8_t is_loopItem;
     int16_t item_index; /* -1 means there is nothing in the items vector */
