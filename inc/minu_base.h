@@ -13,6 +13,18 @@ typedef struct
 {
     uint16_t x;
     uint16_t y;
+} minu_pos_t;
+
+typedef struct
+{
+    uint16_t w;
+    uint16_t h;
+} minu_size_t;
+
+typedef struct
+{
+    uint16_t x;
+    uint16_t y;
     uint16_t w;
     uint16_t h;
 } minu_base_t;
@@ -36,9 +48,9 @@ static inline void minu_base_setAttrWith(void *dest, void *src)
     *((minu_base_t *)dest) = *((minu_base_t *)src);
 }
 
-static inline minu_base_t minu_base_getAttr(void *me)
+static inline minu_base_t *minu_base_getAttr(void *me)
 {
-    return *(minu_base_t *)me;
+    return (minu_base_t *)me;
 }
 
 static inline void minu_base_setPos(void *me, uint16_t x, uint16_t y)

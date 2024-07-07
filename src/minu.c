@@ -51,12 +51,13 @@ void minu_addItem(minu_t *const me,
     uint16_t x, y, w, h;
     minu_item_t new_item = {0};
     minu_layout_t *layout = &me->layout;
+    minu_base_t *menu_attr = minu_base_getAttr(me);
 
     w = minu_disp_getStrWidth(name);
     h = minu_disp_getFontHeight();
 
-    x = me->super.x;
-    y = me->super.y + (h + layout->item_gap) * VECTOR_SIZE(me->items);
+    x = menu_attr->x;
+    y = menu_attr->y + (h + layout->item_gap) * VECTOR_SIZE(me->items);
 
     minu_base_setAttr(&new_item, x, y, w, h);
     minu_item_set(&new_item, name, cb, user_data);
@@ -105,10 +106,7 @@ void minu_goNext(minu_t *me)
     if (++me->item_index == VECTOR_SIZE(me->items))
     {
         if (me->is_loopItem)
-        {
             me->item_index = 0;
-            me->is_loopItem |= 1 << 7;
-        }
         else
             me->item_index = VECTOR_SIZE(me->items) - 1;
     }
@@ -121,10 +119,7 @@ void minu_goPrevious(minu_t *me)
     if (me->item_index-- == 0)
     {
         if (me->is_loopItem)
-        {
             me->item_index = VECTOR_SIZE(me->items) - 1;
-            me->is_loopItem |= 1 << 6;
-        }
         else
             me->item_index = 0;
     }
@@ -170,8 +165,8 @@ void minu_deleteItem(minu_t *me)
     for (uint16_t i = VECTOR_SIZE(me->items) - 1; i > me->item_index; i--)
     {
         minu_item_t *now = &VECTOR_AT(me->items, i);
-        minu_base_t prev_pos = minu_base_getAttr(&VECTOR_AT(me->items, i - 1));
-        minu_base_setPos(now, prev_pos.x, prev_pos.y);
+        minu_base_t *prev_pos = minu_base_getAttr(&VECTOR_AT(me->items, i - 1));
+        minu_base_setPos(now, prev_pos->x, prev_pos->y);
     }
 
     /* this function will modfiy vector size,

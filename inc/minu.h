@@ -41,10 +41,10 @@ struct _menu
     /* for graph */
     minu_layout_t layout;
 
-    uint8_t is_loopItem;
     int16_t item_index; /* -1 means there is nothing in the items vector */
     uint8_t menuType     : 3; /* @ref enum minu_type_t */
     uint8_t is_usingAnim : 1;
+    uint8_t is_loopItem  : 1;
 };
 
 minu_t *minu_creat(uint8_t type,
