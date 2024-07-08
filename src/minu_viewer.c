@@ -18,13 +18,13 @@ typedef enum
     STATUS_IGNORED,
 } state_t;
 
-typedef enum
+enum reserved_event
 {
     /* for triggering the entry action in a state */
     EVENT_STATE_ENTRY = MINU_EVENT_MAX,
     /* for triggering the exit action from a state */
     EVENT_STATE_EXIT,
-} reserved_event;
+};
 
 typedef struct minu_viewer_t minu_viewer_t;
 typedef state_t (*stateHandler)(minu_viewer_t *me, minu_event_id_t e);
@@ -39,24 +39,21 @@ typedef struct
 struct minu_viewer_t
 {
     stateHandler state;
-    minu_t *act_menu;
+    minu_handle_t act_menu;
+
     minu_event_t evt;
     minu_base_t selector;
-    struct
-    {
-        uint16_t x;
-        uint16_t y;
-    } offset;
+    minu_pos_t offset;
 };
 
 #define TRAN_STATE(target) (me->state = (target), STATUS_TRAN)
 
 static state_t _handleMenu(minu_viewer_t *me, minu_event_id_t e)
 {
-    minu_t *menu = me->act_menu;
+    minu_handle_t menu = me->act_menu;
     state_t status = STATUS_IGNORED;
 
-    if (VECTOR_SIZE(menu->items) == 0)
+    if (!minu_getSize(menu))
         return status;
 
     switch ((uint8_t)e)
@@ -125,7 +122,7 @@ void minu_viewer_event_post_to(minu_viewer_handle_t me, minu_event_id_t e)
  *
  * @param menu  menu to be focused
  */
-minu_viewer_handle_t minu_viewer_create(minu_t *menu)
+minu_viewer_handle_t minu_viewer_create(minu_handle_t menu)
 {
     minu_viewer_handle_t ret;
     const minu_base_t *first_attr = NULL;
@@ -142,7 +139,7 @@ minu_viewer_handle_t minu_viewer_create(minu_t *menu)
     minu_viewer_event_post_to(ret, MINU_EVENT_REFRESH);
 
     /* set selector's attribute */
-    first_attr = minu_base_getAttr(&VECTOR_BEGIN(menu->items));
+    first_attr = minu_base_getAttr(minu_getSelectedItem(menu));
     minu_base_setAttrWith(&ret->selector, (void *)first_attr);
 
     return ret;
@@ -169,57 +166,53 @@ static uint8_t _get_event(minu_event_t *const me)
 
 static void _update_offsetWindow(minu_viewer_t *me)
 {
-    minu_t *menu;
-    int new_offset_x, new_offset_y;
+    minu_pos_t offset = {0};
     int16_t item_edge_x, item_edge_y;
     const minu_base_t *item_attr, *menu_attr;
 
-    if (!VECTOR_SIZE(me->act_menu->items))
+    if (!minu_getSize(me->act_menu))
         return;
 
-    menu = me->act_menu;
-    new_offset_x = me->offset.x;
-    new_offset_y = me->offset.y;
-    menu_attr = minu_base_getAttr(menu);
-    item_attr = minu_base_getAttr(&VECTOR_AT(menu->items, menu->item_index));
+    offset.x = me->offset.x;
+    offset.y = me->offset.y;
+    menu_attr = minu_base_getAttr(me->act_menu);
+    item_attr = minu_base_getAttr(minu_getSelectedItem(me->act_menu));
 
     item_edge_x = item_attr->x + item_attr->w;
     item_edge_y = item_attr->y + item_attr->h;
 
-    if (item_edge_x > (new_offset_x + menu_attr->w))
+    if (item_edge_x > (offset.x + menu_attr->w))
     {
-        new_offset_x = item_edge_x - menu_attr->w;
+        offset.x = item_edge_x - menu_attr->w;
         /* align to item's width */
-        uint8_t lack = (new_offset_x + item_attr->w) % item_attr->w;
-        new_offset_x += (item_attr->w - lack);
+        uint8_t lack = offset.x % item_attr->w;
+        offset.x += (item_attr->w - lack);
     }
-    else if (item_attr->x < new_offset_x)
-        new_offset_x = item_attr->x;
+    else if (item_attr->x < offset.x)
+        offset.x = item_attr->x;
 
-    if (item_edge_y > (new_offset_y + menu_attr->h))
+    if (item_edge_y > (offset.y + menu_attr->h))
     {
-        new_offset_y = item_edge_y - menu_attr->h;
+        offset.y = item_edge_y - menu_attr->h;
         /* align to item's height */
-        uint8_t lack = (new_offset_y + item_attr->h) % item_attr->h;
-        new_offset_y += (item_attr->h - lack);
+        uint8_t lack = offset.y % item_attr->h;
+        offset.y += (item_attr->h - lack);
     }
-    else if (item_attr->y < new_offset_y)
-        new_offset_y = item_attr->y;
+    else if (item_attr->y < offset.y)
+        offset.y = item_attr->y;
 
-    me->offset.x = new_offset_x;
-    me->offset.y = new_offset_y;
+    minu_pos_set(&me->offset, offset.x, offset.y);
 }
 
 static void _update_selector(minu_viewer_t *me)
 {
     minu_base_t tar_sel = {0};
-    minu_t *menu = me->act_menu;
     const minu_base_t *item_attr = NULL;
 
-    if (VECTOR_SIZE(menu->items) == 0)
+    if (!minu_getSize(me->act_menu))
         return;
 
-    item_attr = minu_base_getAttr(&VECTOR_AT(menu->items, menu->item_index));
+    item_attr = minu_base_getAttr(minu_getSelectedItem(me->act_menu));
 
     tar_sel.w = item_attr->w;
     tar_sel.h = item_attr->h;
@@ -228,17 +221,16 @@ static void _update_selector(minu_viewer_t *me)
     minu_base_setAttrWith(&me->selector, &tar_sel);
 
     ESP_LOGI("",
-             "select_y=%d, offset_x=%d, offset_y=%d, i=%d\n",
+             "select_y=%d, offset_y=%d, i=%d\n",
              me->selector.y,
-             me->offset.x,
              me->offset.y,
-             menu->item_index);
+             minu_getIndex(me->act_menu));
 }
 
 static void _draw_selector(minu_viewer_t *me)
 {
     int16_t lay = 0;
-    minu_layout_t *layout = &me->act_menu->layout;
+    minu_layout_t *layout = minu_getLayout(me->act_menu);
 
     if (me->selector.x != 0)
         lay += layout->item_gap;
@@ -251,52 +243,54 @@ static void _draw_selector(minu_viewer_t *me)
                              me->selector.h);
 }
 
-static void _draw_progress_bar(minu_t *menu)
+static void _draw_progress_bar(minu_handle_t menu)
 {
     const minu_base_t *menu_attr = minu_base_getAttr(menu);
     int16_t bar_offseted_x = menu_attr->x + menu_attr->w;
+    minu_layout_t *layout = minu_getLayout(menu);
 
     // draw bar top width
-    minu_disp_drawHLine(bar_offseted_x - menu->layout.bar_width,
+    minu_disp_drawHLine(bar_offseted_x - layout->bar_width,
                         menu_attr->y,
-                        menu->layout.bar_width);
+                        layout->bar_width);
 
     // draw bar bottom width
-    minu_disp_drawHLine(bar_offseted_x - menu->layout.bar_width,
+    minu_disp_drawHLine(bar_offseted_x - layout->bar_width,
                         menu_attr->y + menu_attr->h - 1,
-                        menu->layout.bar_width);
+                        layout->bar_width);
 
     // draw bar height
-    minu_disp_drawVLine(bar_offseted_x - (menu->layout.bar_width / 2 + 1),
+    minu_disp_drawVLine(bar_offseted_x - (layout->bar_width / 2 + 1),
                         menu_attr->y,
                         menu_attr->h);
 
     // items count from 0
-    uint8_t item_size = VECTOR_SIZE(menu->items);
+    uint8_t item_size = minu_getSize(menu);
     int16_t h_per_progress = item_size ? menu_attr->h / item_size : 0;
-    int16_t progress = (menu->item_index + 1) != item_size
-                           ? (menu->item_index + 1) * h_per_progress
+    int16_t progress = (minu_getIndex(menu) + 1) != item_size
+                           ? (minu_getIndex(menu) + 1) * h_per_progress
                            : menu_attr->h;
 
-    minu_disp_fillRect(bar_offseted_x - menu->layout.bar_width,
+    minu_disp_fillRect(bar_offseted_x - layout->bar_width,
                        menu_attr->y,
-                       menu->layout.bar_width,
+                       layout->bar_width,
                        progress);
 }
 
 static void _draw_items(minu_viewer_t *me)
 {
-    minu_t *menu = me->act_menu;
-    minu_layout_t *layout = &menu->layout;
-    const minu_base_t *menu_attr = minu_base_getAttr(menu);
+    minu_item_t *item = NULL;
+    minu_vector_itme_t *vec = minu_getItems(me->act_menu);
+    minu_layout_t *layout = minu_getLayout(me->act_menu);
+    const minu_base_t *menu_attr = minu_base_getAttr(me->act_menu);
 
     /* draw all the items in the screen */
-    for (uint8_t i = 0; i < VECTOR_SIZE(menu->items); i++)
+    while (minu_vector_iter_next(vec, &item))
     {
         minu_pos_t target;
         const minu_base_t *item_attr;
 
-        item_attr = minu_base_getAttr(&VECTOR_AT(menu->items, i));
+        item_attr = minu_base_getAttr(item);
         target.x = item_attr->x - me->offset.x;
         target.y = item_attr->y - me->offset.y;
 
@@ -307,17 +301,11 @@ static void _draw_items(minu_viewer_t *me)
         if (target.y >= menu_attr->y &&
             target.y < (menu_attr->y + menu_attr->h))
         {
-            const char *item_name = VECTOR_AT(menu->items, i).name;
-
-            ESP_LOGD("",
-                     "y: %d tar_y: %d h: %d",
-                     item_attr->y,
-                     target.y,
-                     item_attr->h);
+            ESP_LOGD("", "name:%s", item->name);
 
             minu_disp_drawStr(target.x + layout->border_gap,
                               target.y,
-                              item_name);
+                              item->name);
         }
     }
 }

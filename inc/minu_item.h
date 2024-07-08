@@ -10,7 +10,7 @@ extern "C" {
 #include "minu_conf.h"
 #include "minu_base.h"
 
-struct _menu;
+typedef struct minu_t *minu_handle_t;
 typedef void (*minu_item_cb)(void *para);
 
 typedef enum
@@ -41,7 +41,7 @@ typedef struct _menu_item
 
     minu_item_cb cb;
     void *user_data;
-    struct _menu *sub_menu;
+    minu_handle_t sub_menu;
 } minu_item_t;
 
 void minu_item_setName(minu_item_t *const me, char *name);

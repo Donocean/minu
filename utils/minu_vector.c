@@ -59,3 +59,17 @@ inline void minu_vector_del(minu_vector_itme_t *const me)
 {
     MINU_MEM_CUSTOM_FREE(me->items);
 }
+
+uint8_t minu_vector_iter_next(minu_vector_itme_t  *const me, minu_item_t **result)
+{
+    uint8_t ret = 1;
+    static uint16_t iter_cursor = 0;
+
+    *result = &me->items[iter_cursor];
+
+    if (iter_cursor++ == me->size)
+        iter_cursor = ret = 0;
+
+    return ret;
+}
+

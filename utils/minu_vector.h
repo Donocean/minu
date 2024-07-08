@@ -30,6 +30,7 @@ void minu_vector_push_back(minu_vector_itme_t *const me, minu_item_t *item);
 void minu_vector_erase(minu_vector_itme_t *const me, uint16_t index);
 void minu_vector_pop_back(minu_vector_itme_t *const me);
 void minu_vector_del(minu_vector_itme_t *const me);
+uint8_t minu_vector_iter_next(minu_vector_itme_t  *const me, minu_item_t **result);
 
 #ifdef __cplusplus
 }
