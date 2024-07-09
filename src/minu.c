@@ -5,6 +5,7 @@
 #include "minu_vector.h"
 #include <assert.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <sys/queue.h>
 #include MINU_MEM_CUSTOM_INCLUDE
 
@@ -134,9 +135,6 @@ minu_handle_t minu_creat(minu_type_cb type,
     /* set menu attributes */
     minu_base_setAttr(ret, x, y, w, h);
 
-    /* restricts all graphics output to the specified range */
-    minu_disp_setWindow(x, y, w, h);
-
     return ret;
 }
 
@@ -154,7 +152,7 @@ void minu_addItem(minu_handle_t me,
 
     me->type_cb(me, &new_item, &str_size, NULL);
 
-    minu_item_set(&new_item, name, cb, user_data);
+    minu_item_set(&new_item, name, type, cb, user_data);
     minu_vector_push_back(&me->items, &new_item);
 }
 
@@ -184,18 +182,42 @@ void minu_goPrevious(minu_handle_t me)
     }
 }
 
-void minu_goIn(minu_handle_t *act_menu)
+/**
+ * @brief entry the selected item
+ * @return 1: need to transfer state, otherwise no
+ */
+bool minu_goIn(minu_handle_t *act_menu, uint8_t e)
 {
     assert(VECTOR_SIZE((*act_menu)->items) != 0);
 
+    uint8_t ret = false;
     minu_t *me = *act_menu;
     minu_item_t *item = &VECTOR_AT(me->items, me->item_index);
 
-    if (item->cb)
-        item->cb(item->user_data);
-
-    if (item->sub_menu)
-        *act_menu = item->sub_menu;
+    switch (item->type)
+    {
+        case MINU_ITEM_TYPE_SUBMENU:
+            if (item->u.sub_menu)
+            {
+                ret = true;
+                *act_menu = item->u.sub_menu;
+            }
+            break;
+        case MINU_ITEM_TYPE_CHECKBOX:
+            bool *flag = (bool *)item->u.user_data;
+            *flag = !(*flag);
+            break;
+        case MINU_ITEM_TYPE_VARIABLE:
+        case MINU_ITEM_TYPE_POPWINDOW:
+            /* actually only use we only call the cb */
+            if (item->cb)
+            {
+                ret = true;
+                item->cb(item->u.user_data, e);
+            }
+            break;
+    }
+    return ret;
 }
 
 void minu_goOut(minu_handle_t *act_menu)

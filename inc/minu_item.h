@@ -11,7 +11,7 @@ extern "C" {
 #include "minu_base.h"
 
 typedef struct minu_t *minu_handle_t;
-typedef void (*minu_item_cb)(void *para);
+typedef void (*minu_item_cb)(void *para, uint16_t e);
 
 typedef enum
 {
@@ -40,15 +40,23 @@ typedef struct _menu_item
 #endif
 
     minu_item_cb cb;
-    void *user_data;
-    minu_handle_t sub_menu;
+    union
+    {
+        void *user_data;
+        minu_handle_t sub_menu;
+    } u;
+
+    /* @ref minu_item_type_t */
+    uint8_t type;
+
 } minu_item_t;
 
 void minu_item_setName(minu_item_t *const me, char *name);
 void minu_item_set(minu_item_t *const me,
                    char *name,
+                   uint8_t type,
                    minu_item_cb cb,
-                   void *user_data);
+                   void *data);
 
 #ifdef __cplusplus
 }

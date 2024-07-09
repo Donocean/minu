@@ -54,7 +54,7 @@ void minu_addItem(minu_handle_t me,
 
 void minu_goNext(minu_handle_t me);
 void minu_goPrevious(minu_handle_t me);
-void minu_goIn(minu_handle_t *act_menu);
+bool minu_goIn(minu_handle_t *act_menu, uint8_t e);
 void minu_goOut(minu_handle_t *act_menu);
 void minu_deleteItem(minu_handle_t me);
 

@@ -4,6 +4,7 @@
 #include "minu_disp.h"
 #include "minu_item.h"
 #include "minu_vector.h"
+#include <stdbool.h>
 #include MINU_MEM_CUSTOM_INCLUDE
 
 #include <stdint.h>
@@ -46,7 +47,28 @@ struct minu_viewer_t
     minu_pos_t offset;
 };
 
+void (*draw_item_annex_cb)(minu_item_t *me);
+
 #define TRAN_STATE(target) (me->state = (target), STATUS_TRAN)
+
+static void _refresh_menu(minu_viewer_t *me);
+
+static state_t _handleItem(minu_viewer_t *me, minu_event_id_t e)
+{
+    state_t status = STATUS_IGNORED;
+
+    switch ((uint8_t)e)
+    {
+        case EVENT_STATE_ENTRY:
+            break;
+        case EVENT_STATE_EXIT:
+            break;
+        default:
+            break;
+    }
+
+    return status;
+}
 
 static state_t _handleMenu(minu_viewer_t *me, minu_event_id_t e)
 {
@@ -70,7 +92,15 @@ static state_t _handleMenu(minu_viewer_t *me, minu_event_id_t e)
             minu_goNext(menu);
             break;
         case MINU_EVENT_ENTER:
-            minu_goIn(&menu);
+            if (minu_goIn(&menu, e))
+            {
+                minu_item_t *item = minu_getSelectedItem(me->act_menu);
+
+                if (item->type == MINU_ITEM_TYPE_SUBMENU)
+                    _refresh_menu(me);
+                else
+                    status = TRAN_STATE(&_handleItem);
+            }
             break;
         case MINU_EVENT_QUIT:
             minu_goOut(&menu);
@@ -80,23 +110,6 @@ static state_t _handleMenu(minu_viewer_t *me, minu_event_id_t e)
             break;
         default:
             status = STATUS_IGNORED;
-            break;
-    }
-
-    return status;
-}
-
-static state_t _handleItem(minu_viewer_t *me, minu_event_id_t e)
-{
-    state_t status = STATUS_IGNORED;
-
-    switch ((uint8_t)e)
-    {
-        case EVENT_STATE_ENTRY:
-            break;
-        case EVENT_STATE_EXIT:
-            break;
-        default:
             break;
     }
 
@@ -125,22 +138,27 @@ void minu_viewer_event_post_to(minu_viewer_handle_t me, minu_event_id_t e)
 minu_viewer_handle_t minu_viewer_create(minu_handle_t menu)
 {
     minu_viewer_handle_t ret;
-    const minu_base_t *first_attr = NULL;
+    const minu_base_t *first_attr, *menu_attr;
 
     ret = MINU_MEM_CUSTOM_ALLOC(sizeof(minu_viewer_t));
     assert(ret != NULL);
 
+    ret->offset.x = 0;
+    ret->offset.y = 0;
     ret->act_menu = menu;
     ret->state = _handleMenu;
     ret->state(ret, EVENT_STATE_ENTRY);
-    ret->offset.x = ret->offset.y = 0;
-
-    /* refresh the screen */
-    minu_viewer_event_post_to(ret, MINU_EVENT_REFRESH);
 
     /* set selector's attribute */
     first_attr = minu_base_getAttr(minu_getSelectedItem(menu));
     minu_base_setAttrWith(&ret->selector, (void *)first_attr);
+
+    /* restricts all graphics output to the specified range */
+    menu_attr = minu_base_getAttr(menu);
+    minu_disp_setWindow(menu_attr->x, menu_attr->y, menu_attr->w, menu_attr->h);
+
+    /* refresh the screen */
+    minu_viewer_event_post_to(ret, MINU_EVENT_REFRESH);
 
     return ret;
 }
@@ -273,7 +291,6 @@ static void _draw_items(minu_viewer_t *me)
 {
     minu_item_t *item = NULL;
     minu_vector_itme_t *vec = minu_getItems(me->act_menu);
-    const minu_base_t *menu_attr = minu_base_getAttr(me->act_menu);
 
     /* draw all the items in the screen */
     while (minu_vector_iter_next(vec, &item))
@@ -305,6 +322,12 @@ static void _render(minu_viewer_t *me)
 
     // flush buffer to the screen
     minu_disp_flush();
+}
+
+static void _refresh_menu(minu_viewer_t *me)
+{
+    me->state(me, EVENT_STATE_EXIT);
+    me->state(me, EVENT_STATE_ENTRY);
 }
 
 static void _state_dispatch(minu_viewer_t *me, uint16_t e)
