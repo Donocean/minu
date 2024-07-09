@@ -29,6 +29,7 @@ typedef struct
     void (*drawHLine)(int16_t x, int16_t y, uint16_t len);
     void (*drawVLine)(int16_t x, int16_t y, uint16_t len);
     void (*drawStr)(int16_t x, int16_t y, const char *str);
+    void (*setWindow)(int16_t x, int16_t y, uint16_t w, uint16_t h);
     void (*flush)(void);
 } minu_ops_t;
 

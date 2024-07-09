@@ -10,6 +10,7 @@
 #define MINU_DISPLAY_USE_MONO
 #endif
 
+static void port_setWindow(int16_t x, int16_t y, uint16_t w, uint16_t h);
 extern void minu_disp_set(void *disp);
 static void port_flush(void);
 static void port_drawStr(int16_t x, int16_t y, const char *str);
@@ -17,7 +18,11 @@ static void port_setFontDatum(uint8_t datum);
 static void port_setFont(void *font);
 static uint16_t port_getStrWidth(char *str);
 static int8_t port_getFontHeight(void);
-static void port_drawIcon(int16_t x, int16_t y, uint16_t w, uint16_t h, void *icon);
+static void port_drawIcon(int16_t x,
+                          int16_t y,
+                          uint16_t w,
+                          uint16_t h,
+                          void *icon);
 static void port_fillRect(int16_t x, int16_t y, uint16_t w, uint16_t h);
 static void port_fillRectInDiff(int16_t x, int16_t y, int16_t w, int16_t h);
 static void port_drawHLine(int16_t x, int16_t y, uint16_t len);
@@ -36,6 +41,7 @@ static minu_ops_t disp_ops = {
     .getFontHeight = port_getFontHeight,
     .drawHLine = port_drawHLine,
     .drawVLine = port_drawVLine,
+    .setWindow = port_setWindow,
 };
 
 /* Note: call this function after the u8g2 has been initialized! */
@@ -44,6 +50,11 @@ void minu_port_new_disp_u8g2(void *u8g2_obj)
     port_u8g2 = u8g2_obj;
     port_setFontDatum(TL_DATUM);
     minu_disp_set(&disp_ops);
+}
+
+static void port_setWindow(int16_t x, int16_t y, uint16_t w, uint16_t h)
+{
+    u8g2_SetClipWindow(port_u8g2, x, y, x + w, y + h);
 }
 
 static void port_fillRect(int16_t x, int16_t y, uint16_t w, uint16_t h)
@@ -58,7 +69,11 @@ static void port_fillRectInDiff(int16_t x, int16_t y, int16_t w, int16_t h)
     u8g2_SetDrawColor(port_u8g2, 1);
 }
 
-static void port_drawIcon(int16_t x, int16_t y, uint16_t w, uint16_t h, void *icon)
+static void port_drawIcon(int16_t x,
+                          int16_t y,
+                          uint16_t w,
+                          uint16_t h,
+                          void *icon)
 {
     u8g2_DrawXBM(port_u8g2, x, y, w, h, icon);
 }

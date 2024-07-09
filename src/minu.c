@@ -2,6 +2,7 @@
 #include "minu_base.h"
 #include "minu_disp.h"
 #include "minu_item.h"
+#include "minu_vector.h"
 #include <assert.h>
 #include <stdbool.h>
 #include <sys/queue.h>
@@ -18,9 +19,10 @@ struct minu_t
 
     /* for graph */
     minu_layout_t layout;
+    /* @ref marco minu type */
+    minu_type_cb type_cb;
 
     int16_t item_index; /* -1 means there is nothing in the items vector */
-    uint8_t menuType     : 3; /* @ref enum minu_type_t */
     uint8_t is_usingAnim : 1;
     uint8_t is_loopItem  : 1;
 };
@@ -46,25 +48,68 @@ struct minu_t
  *     |                           ↓                          |
  *     .------------------------------------------------------. <- canvas bottom
  */
-static void minu_setLayoutDefault(const minu_handle_t me)
+static void minu_setLayoutDefault(minu_handle_t me)
 {
-    me->layout.item_gap = 0;
+    me->layout.item_gap = 2;
     me->layout.border_gap = 2;
     me->layout.bar_width = 5;
 }
 
-void minu_setLayout(const minu_handle_t me, minu_layout_t *layout)
+void minu_type_selector_vertical(minu_handle_t me,
+                                 minu_item_t *new_item,
+                                 minu_size_t *str_size,
+                                 minu_icon_t *icon)
 {
-    me->layout.item_gap = layout->item_gap;
-    me->layout.border_gap = layout->border_gap;
+    minu_base_t item_attr = {0};
+    uint16_t item_size = minu_getSize(me);
+    minu_layout_t *layout = minu_getLayout(me);
+    minu_vector_itme_t *vec = minu_getItems(me);
+    minu_base_t *menu_attr = minu_base_getAttr(me);
+
+    if (item_size)
+    {
+        const minu_base_t *last_item_attr =
+            minu_base_getAttr(&PVECTOR_AT(vec, item_size - 1));
+        item_attr.y = last_item_attr->y + last_item_attr->h + layout->item_gap;
+    }
+    else
+        item_attr.y = menu_attr->y + layout->border_gap;
+
+    item_attr.x = menu_attr->x + layout->border_gap;
+    item_attr.w = str_size->w;
+    item_attr.h = str_size->h;
+
+    minu_base_setAttrWith(new_item, &item_attr);
 }
 
-void minu_loopItem_on_off(const minu_handle_t me, bool enable)
+void minu_type_selector_horizontal(minu_handle_t me,
+                                   minu_item_t *new_item,
+                                   minu_size_t *str_size,
+                                   minu_icon_t *icon)
 {
-    me->is_loopItem = enable;
+    minu_base_t item_attr = {0};
+    uint16_t item_size = minu_getSize(me);
+    minu_layout_t *layout = minu_getLayout(me);
+    minu_vector_itme_t *vec = minu_getItems(me);
+    minu_base_t *menu_attr = minu_base_getAttr(me);
+
+    if (item_size)
+    {
+        const minu_base_t *last_item_attr =
+            minu_base_getAttr(&PVECTOR_AT(vec, item_size - 1));
+        item_attr.x = last_item_attr->x + last_item_attr->w + layout->item_gap;
+    }
+    else
+        item_attr.x = menu_attr->x + layout->border_gap;
+
+    item_attr.y = menu_attr->y + layout->border_gap;
+    item_attr.w = str_size->w;
+    item_attr.h = str_size->h;
+
+    minu_base_setAttrWith(new_item, &item_attr);
 }
 
-minu_handle_t minu_creat(uint8_t type,
+minu_handle_t minu_creat(minu_type_cb type,
                          const char *title,
                          uint16_t x,
                          uint16_t y,
@@ -77,7 +122,7 @@ minu_handle_t minu_creat(uint8_t type,
     assert(ret != NULL);
 
     ret->title = title;
-    ret->menuType = type;
+    ret->type_cb = type;
     ret->item_index = 0;
     ret->is_loopItem = 1;
     ret->is_usingAnim = 1;
@@ -89,68 +134,28 @@ minu_handle_t minu_creat(uint8_t type,
     /* set menu attributes */
     minu_base_setAttr(ret, x, y, w, h);
 
+    /* restricts all graphics output to the specified range */
+    minu_disp_setWindow(x, y, w, h);
+
     return ret;
 }
 
-void minu_addItem(const minu_handle_t me,
+void minu_addItem(minu_handle_t me,
                   minu_item_type_t type,
                   char *name,
                   minu_item_cb cb,
                   void *user_data)
 {
-    uint16_t x, y, w, h;
     minu_item_t new_item = {0};
-    minu_layout_t *layout = &me->layout;
-    minu_base_t *menu_attr = minu_base_getAttr(me);
+    minu_size_t str_size = {0};
 
-    w = minu_disp_getStrWidth(name);
-    h = minu_disp_getFontHeight();
+    str_size.w = minu_disp_getStrWidth(name);
+    str_size.h = minu_disp_getFontHeight();
 
-    x = menu_attr->x;
-    y = menu_attr->y + (h + layout->item_gap) * VECTOR_SIZE(me->items);
+    me->type_cb(me, &new_item, &str_size, NULL);
 
-    minu_base_setAttr(&new_item, x, y, w, h);
     minu_item_set(&new_item, name, cb, user_data);
     minu_vector_push_back(&me->items, &new_item);
-}
-
-/**
- * @brief return the current selected item of minu
- */
-minu_item_t *minu_getSelectedItem(minu_handle_t me)
-{
-    return &VECTOR_AT(me->items, me->item_index);
-}
-
-/**
- * @brief return the number of the items in the minu
- */
-uint16_t minu_getSize(minu_handle_t me)
-{
-    return VECTOR_SIZE(me->items);
-}
-
-int16_t minu_getIndex(minu_handle_t me)
-{
-    return me->item_index;
-}
-
-minu_layout_t *minu_getLayout(minu_handle_t me)
-{
-    return &me->layout;
-}
-
-minu_vector_itme_t *minu_getItems(minu_handle_t me)
-{
-    return &me->items;
-}
-
-/* TODO: this function can not delete recursive menu in the items. Maybe I
- * should fix it */
-void minu_delete(minu_handle_t me)
-{
-    minu_vector_del(&me->items);
-    MINU_MEM_CUSTOM_FREE(me);
 }
 
 void minu_goNext(minu_handle_t me)
@@ -224,9 +229,59 @@ void minu_deleteItem(minu_handle_t me)
     }
 
     /* this function will modfiy vector size,
-     * therefore we need to record is_end */
+     * therefore we need to record `is_end` */
     minu_vector_erase(&me->items, me->item_index);
 
     if (is_end)
         me->item_index--;
+}
+
+void minu_setLayout(minu_handle_t me, minu_layout_t *layout)
+{
+    me->layout.item_gap = layout->item_gap;
+    me->layout.border_gap = layout->border_gap;
+}
+
+void minu_loopItem_on_off(minu_handle_t me, bool enable)
+{
+    me->is_loopItem = enable;
+}
+
+minu_layout_t *minu_getLayout(minu_handle_t me)
+{
+    return &me->layout;
+}
+
+/**
+ * @brief return the number of the items in the minu
+ */
+uint16_t minu_getSize(minu_handle_t me)
+{
+    return VECTOR_SIZE(me->items);
+}
+
+int16_t minu_getIndex(minu_handle_t me)
+{
+    return me->item_index;
+}
+
+/**
+ * @brief return the current selected item of minu
+ */
+minu_item_t *minu_getSelectedItem(minu_handle_t me)
+{
+    return &VECTOR_AT(me->items, me->item_index);
+}
+
+minu_vector_itme_t *minu_getItems(minu_handle_t me)
+{
+    return &me->items;
+}
+
+/* TODO: this function can not delete recursive menu in the items. Maybe I
+ * should fix it */
+void minu_delete(minu_handle_t me)
+{
+    minu_vector_del(&me->items);
+    MINU_MEM_CUSTOM_FREE(me);
 }

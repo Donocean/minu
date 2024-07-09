@@ -2,7 +2,6 @@
 #include "minu_port.h"
 #include <assert.h>
 #include MINU_MEM_CUSTOM_INCLUDE
-#include <stddef.h>
 
 static minu_ops_t *g_ops;
 
@@ -103,4 +102,10 @@ void minu_disp_flush(void)
 {
     assert(g_ops != NULL);
     g_ops->flush();
+}
+
+void minu_disp_setWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
+{
+    assert(g_ops != NULL);
+    return g_ops->setWindow(x, y, w, h);
 }

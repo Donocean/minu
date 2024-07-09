@@ -169,6 +169,7 @@ static void _update_offsetWindow(minu_viewer_t *me)
     minu_pos_t offset = {0};
     int16_t item_edge_x, item_edge_y;
     const minu_base_t *item_attr, *menu_attr;
+    const minu_layout_t *layout = minu_getLayout(me->act_menu);
 
     if (!minu_getSize(me->act_menu))
         return;
@@ -181,25 +182,18 @@ static void _update_offsetWindow(minu_viewer_t *me)
     item_edge_x = item_attr->x + item_attr->w;
     item_edge_y = item_attr->y + item_attr->h;
 
-    if (item_edge_x > (offset.x + menu_attr->w))
-    {
-        offset.x = item_edge_x - menu_attr->w;
-        /* align to item's width */
-        uint8_t lack = offset.x % item_attr->w;
-        offset.x += (item_attr->w - lack);
-    }
-    else if (item_attr->x < offset.x)
-        offset.x = item_attr->x;
+    if (item_edge_x > (offset.x + menu_attr->w + +menu_attr->x))
+        offset.x = item_edge_x - menu_attr->w - menu_attr->x;
+    else if ((item_attr->x - menu_attr->x) < offset.x)
+        offset.x = item_attr->x - menu_attr->x - layout->border_gap;
 
-    if (item_edge_y > (offset.y + menu_attr->h))
-    {
-        offset.y = item_edge_y - menu_attr->h;
-        /* align to item's height */
-        uint8_t lack = offset.y % item_attr->h;
-        offset.y += (item_attr->h - lack);
-    }
-    else if (item_attr->y < offset.y)
-        offset.y = item_attr->y;
+    /* `menu_attr->y` here means we need align the coordinate to the position of
+     * origin of the screen. e.g. the menu is at (x:20, y:20, w: 128-20, h:
+     * 64-20) instead of origin(x:0, y:0, w: 128, h: 64) */
+    if (item_edge_y > (offset.y + menu_attr->h + menu_attr->y))
+        offset.y = item_edge_y - menu_attr->h - menu_attr->y;
+    else if ((item_attr->y - menu_attr->y) < offset.y)
+        offset.y = item_attr->y - menu_attr->y - layout->border_gap;
 
     minu_pos_set(&me->offset, offset.x, offset.y);
 }
@@ -208,38 +202,36 @@ static void _update_selector(minu_viewer_t *me)
 {
     minu_base_t tar_sel = {0};
     const minu_base_t *item_attr = NULL;
+    const minu_layout_t *layout = minu_getLayout(me->act_menu);
 
     if (!minu_getSize(me->act_menu))
         return;
 
     item_attr = minu_base_getAttr(minu_getSelectedItem(me->act_menu));
 
-    tar_sel.w = item_attr->w;
+    tar_sel.w = item_attr->w + layout->border_gap * 2;
     tar_sel.h = item_attr->h;
     tar_sel.y = item_attr->y - me->offset.y;
-    tar_sel.x = item_attr->x - me->offset.x;
+    tar_sel.x = item_attr->x - me->offset.x - layout->border_gap;
     minu_base_setAttrWith(&me->selector, &tar_sel);
 
     ESP_LOGI("",
-             "select_y=%d, offset_y=%d, i=%d\n",
+             "select_x=%d, offset_x=%d, item_x=%d",
+             me->selector.x,
+             me->offset.x,
+             item_attr->x);
+    ESP_LOGI("",
+             "select_y=%d, offset_y=%d, item_y=%d\n",
              me->selector.y,
              me->offset.y,
-             minu_getIndex(me->act_menu));
+             item_attr->y);
 }
 
 static void _draw_selector(minu_viewer_t *me)
 {
-    int16_t lay = 0;
-    minu_layout_t *layout = minu_getLayout(me->act_menu);
-
-    if (me->selector.x != 0)
-        lay += layout->item_gap;
-    else
-        lay += layout->border_gap;
-
     minu_disp_fillRectInDiff(me->selector.x,
-                             me->selector.y + lay,
-                             me->selector.w + layout->border_gap * 2,
+                             me->selector.y,
+                             me->selector.w,
                              me->selector.h);
 }
 
@@ -281,7 +273,6 @@ static void _draw_items(minu_viewer_t *me)
 {
     minu_item_t *item = NULL;
     minu_vector_itme_t *vec = minu_getItems(me->act_menu);
-    minu_layout_t *layout = minu_getLayout(me->act_menu);
     const minu_base_t *menu_attr = minu_base_getAttr(me->act_menu);
 
     /* draw all the items in the screen */
@@ -294,19 +285,7 @@ static void _draw_items(minu_viewer_t *me)
         target.x = item_attr->x - me->offset.x;
         target.y = item_attr->y - me->offset.y;
 
-        /* layout setting */
-        target.y += layout->item_gap + layout->border_gap;
-
-        /* check if the item is in the menu's area */
-        if (target.y >= menu_attr->y &&
-            target.y < (menu_attr->y + menu_attr->h))
-        {
-            ESP_LOGD("", "name:%s", item->name);
-
-            minu_disp_drawStr(target.x + layout->border_gap,
-                              target.y,
-                              item->name);
-        }
+        minu_disp_drawStr(target.x, target.y, item->name);
     }
 }
 
