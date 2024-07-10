@@ -47,15 +47,22 @@ minu_handle_t minu_creat(minu_type_cb type,
                          uint16_t h);
 
 void minu_addItem(minu_handle_t me,
-                  minu_item_type_t type,
                   char *name,
                   minu_item_cb cb,
                   void *user_data);
 
+void minu_addSubmenu(minu_handle_t me, char *item_name, minu_handle_t *menu);
+void minu_addCheckBox(minu_handle_t me, char *item_name, bool *flag);
+void minu_addVariable(minu_handle_t me,
+                      char *item_name,
+                      void *var,
+                      minu_item_cb var_cb);
+void minu_addWindow(minu_handle_t me, char *item_name, minu_item_cb win_cb);
+
 void minu_goNext(minu_handle_t me);
 void minu_goPrevious(minu_handle_t me);
 bool minu_goIn(minu_handle_t *act_menu, uint8_t e);
-void minu_goOut(minu_handle_t *act_menu);
+bool minu_goOut(minu_handle_t *act_menu);
 void minu_deleteItem(minu_handle_t me);
 
 void minu_setLayout(minu_handle_t me, minu_layout_t *layout);

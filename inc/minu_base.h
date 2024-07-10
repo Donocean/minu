@@ -71,6 +71,12 @@ static inline void minu_pos_set(minu_pos_t *me, uint16_t x, uint16_t y)
     me->y = y;
 }
 
+static inline void minu_size_set(minu_size_t *me, uint16_t w, uint16_t h)
+{
+    me->w = w;
+    me->h = h;
+}
+
 #ifdef __cplusplus
 }
 #endif

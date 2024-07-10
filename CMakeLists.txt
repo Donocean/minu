@@ -8,11 +8,16 @@ set(src src/minu.c
         utils/minu_mem.c
         utils/minu_vector.c
         port/minu_port_u8g2.c
+        src/items/minu_item_checkbox.c
+        src/items/minu_item_submenu.c
+        src/items/minu_item_variable.c
+        src/items/minu_item_window.c
     )
 
 set(inc inc
         port
         utils
+        src/items
     )
 
 idf_component_register(SRCS ${src}

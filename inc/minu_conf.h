@@ -11,9 +11,11 @@ extern "C" {
 #define MINU_DISPLAY_USE_MONO
 
 /*========================* ITEM NAME SETTINGS *=========================*/
-/* save space in ram but take more space in rom */
+/* save space in ram but can't modify item's name */
 // #define MINU_ITEM_USING_CONST_NAME
+
 #ifndef MINU_ITEM_USING_CONST_NAME
+/* item's name max length */
 #define MINU_ITEM_NAME_SIZE 32
 #endif
 

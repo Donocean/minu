@@ -139,7 +139,6 @@ minu_handle_t minu_creat(minu_type_cb type,
 }
 
 void minu_addItem(minu_handle_t me,
-                  minu_item_type_t type,
                   char *name,
                   minu_item_cb cb,
                   void *user_data)
@@ -154,6 +153,29 @@ void minu_addItem(minu_handle_t me,
 
     minu_item_set(&new_item, name, type, cb, user_data);
     minu_vector_push_back(&me->items, &new_item);
+}
+
+void minu_addSubmenu(minu_handle_t me, char *item_name, minu_handle_t *menu)
+{
+
+}
+
+void minu_addCheckBox(minu_handle_t me, char *item_name, bool *flag)
+{
+
+}
+
+void minu_addVariable(minu_handle_t me,
+                      char *item_name,
+                      void *var,
+                      minu_item_cb var_cb)
+{
+
+}
+
+void minu_addWindow(minu_handle_t me, char *item_name, minu_item_cb win_cb)
+{
+
 }
 
 void minu_goNext(minu_handle_t me)
@@ -204,12 +226,14 @@ bool minu_goIn(minu_handle_t *act_menu, uint8_t e)
             }
             break;
         case MINU_ITEM_TYPE_CHECKBOX:
-            bool *flag = (bool *)item->u.user_data;
-            *flag = !(*flag);
+            {
+                bool *flag = (bool *)item->u.user_data;
+                *flag = !(*flag);
+            }
             break;
         case MINU_ITEM_TYPE_VARIABLE:
-        case MINU_ITEM_TYPE_POPWINDOW:
-            /* actually only use we only call the cb */
+        case MINU_ITEM_TYPE_WINDOW:
+            /* actually we only call the callback function */
             if (item->cb)
             {
                 ret = true;
@@ -220,16 +244,23 @@ bool minu_goIn(minu_handle_t *act_menu, uint8_t e)
     return ret;
 }
 
-void minu_goOut(minu_handle_t *act_menu)
+/**
+ * @brief entry the selected item
+ * @return 1: need to transfer state, otherwise no
+ */
+bool minu_goOut(minu_handle_t *act_menu)
 {
     assert(VECTOR_SIZE((*act_menu)->items) != 0);
+    bool ret = false;
 
     minu_t *me = *act_menu;
+    if (me->cotainer_menu)
+    {
+        ret = true;
+        *act_menu = me->cotainer_menu;
+    }
 
-    if (VECTOR_SIZE(me->items) == 0)
-        return;
-
-    *act_menu = me->cotainer_menu;
+    return ret;
 }
 
 void minu_deleteItem(minu_handle_t me)
