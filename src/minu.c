@@ -9,6 +9,11 @@
 #include <sys/queue.h>
 #include MINU_MEM_CUSTOM_INCLUDE
 
+#include "minu_item_submenu.h"
+#include "minu_item_checkbox.h"
+#include "minu_item_variable.h"
+#include "minu_item_window.h"
+
 typedef struct minu_t minu_t;
 struct minu_t
 {
@@ -138,31 +143,40 @@ minu_handle_t minu_creat(minu_type_cb type,
     return ret;
 }
 
-void minu_addItem(minu_handle_t me,
-                  char *name,
-                  minu_item_cb cb,
-                  void *user_data)
+void minu_addSubmenu(minu_handle_t me, char *item_name, minu_handle_t submenu)
 {
-    minu_item_t new_item = {0};
     minu_size_t str_size = {0};
+    minu_item_t *new_item = NULL;
 
-    str_size.w = minu_disp_getStrWidth(name);
+    new_item = minu_item_submenu_new(item_name, submenu);
+    if (!new_item)
+        return;
+
+    str_size.w = minu_disp_getStrWidth(item_name);
     str_size.h = minu_disp_getFontHeight();
 
-    me->type_cb(me, &new_item, &str_size, NULL);
+    /* set the base attributes of the new item */
+    me->type_cb(me, new_item, &str_size, NULL);
 
-    minu_item_set(&new_item, name, type, cb, user_data);
-    minu_vector_push_back(&me->items, &new_item);
-}
-
-void minu_addSubmenu(minu_handle_t me, char *item_name, minu_handle_t *menu)
-{
-
+    minu_vector_push_back(&me->items, new_item);
 }
 
 void minu_addCheckBox(minu_handle_t me, char *item_name, bool *flag)
 {
+    minu_size_t str_size = {0};
+    minu_item_t *new_item = NULL;
 
+    new_item = minu_item_checkbox_new(item_name, flag);
+    if (!new_item)
+        return;
+
+    str_size.w = minu_disp_getStrWidth(item_name);
+    str_size.h = minu_disp_getFontHeight();
+
+    /* set the base attributes of the new item */
+    me->type_cb(me, new_item, &str_size, NULL);
+
+    minu_vector_push_back(&me->items, new_item);
 }
 
 void minu_addVariable(minu_handle_t me,
@@ -170,12 +184,24 @@ void minu_addVariable(minu_handle_t me,
                       void *var,
                       minu_item_cb var_cb)
 {
+    minu_size_t str_size = {0};
+    minu_item_t *new_item = NULL;
 
+    new_item = minu_item_variable_new(item_name, var, var_cb);
+    if (!new_item)
+        return;
+
+    str_size.w = minu_disp_getStrWidth(item_name);
+    str_size.h = minu_disp_getFontHeight();
+
+    /* set the base attributes of the new item */
+    me->type_cb(me, new_item, &str_size, NULL);
+
+    minu_vector_push_back(&me->items, new_item);
 }
 
 void minu_addWindow(minu_handle_t me, char *item_name, minu_item_cb win_cb)
 {
-
 }
 
 void minu_goNext(minu_handle_t me)
@@ -213,34 +239,33 @@ bool minu_goIn(minu_handle_t *act_menu, uint8_t e)
     assert(VECTOR_SIZE((*act_menu)->items) != 0);
 
     uint8_t ret = false;
-    minu_t *me = *act_menu;
-    minu_item_t *item = &VECTOR_AT(me->items, me->item_index);
+    /* minu_t *me = *act_menu; */
+    /* minu_item_t *item = &VECTOR_AT(me->items, me->item_index); */
 
-    switch (item->type)
-    {
-        case MINU_ITEM_TYPE_SUBMENU:
-            if (item->u.sub_menu)
-            {
-                ret = true;
-                *act_menu = item->u.sub_menu;
-            }
-            break;
-        case MINU_ITEM_TYPE_CHECKBOX:
-            {
-                bool *flag = (bool *)item->u.user_data;
-                *flag = !(*flag);
-            }
-            break;
-        case MINU_ITEM_TYPE_VARIABLE:
-        case MINU_ITEM_TYPE_WINDOW:
-            /* actually we only call the callback function */
-            if (item->cb)
-            {
-                ret = true;
-                item->cb(item->u.user_data, e);
-            }
-            break;
-    }
+    /* switch (item->type) */
+    /* { */
+    /*     case MINU_ITEM_TYPE_SUBMENU: */
+    /*         if (item->u.sub_menu) */
+    /*         { */
+    /*             ret = true; */
+    /*             *act_menu = item->u.sub_menu; */
+    /*         } */
+    /*         break; */
+    /*     case MINU_ITEM_TYPE_CHECKBOX: */
+    /*         { */
+    /*             bool *flag = (bool *)item->u.user_data; */
+    /*             *flag = !(*flag); */
+    /*         } */
+    /*         break; */
+    /*     case MINU_ITEM_TYPE_VARIABLE: */
+    /*     case MINU_ITEM_TYPE_WINDOW: */
+    /*         if (item->cb) */
+    /*         { */
+    /*             ret = true; */
+    /*             item->cb(item->u.user_data, e); */
+    /*         } */
+    /*         break; */
+    /* } */
     return ret;
 }
 
@@ -276,8 +301,8 @@ void minu_deleteItem(minu_handle_t me)
     /* modfiy every items position */
     for (uint16_t i = VECTOR_SIZE(me->items) - 1; i > me->item_index; i--)
     {
-        minu_item_t *now = &VECTOR_AT(me->items, i);
-        minu_base_t *prev_pos = minu_base_getAttr(&VECTOR_AT(me->items, i - 1));
+        minu_item_t *now = VECTOR_AT(me->items, i);
+        minu_base_t *prev_pos = minu_base_getAttr(VECTOR_AT(me->items, i - 1));
         minu_base_setPos(now, prev_pos->x, prev_pos->y);
     }
 
@@ -323,7 +348,7 @@ int16_t minu_getIndex(minu_handle_t me)
  */
 minu_item_t *minu_getSelectedItem(minu_handle_t me)
 {
-    return &VECTOR_AT(me->items, me->item_index);
+    return VECTOR_AT(me->items, me->item_index);
 }
 
 minu_vector_itme_t *minu_getItems(minu_handle_t me)

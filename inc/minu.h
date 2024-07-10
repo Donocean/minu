@@ -46,12 +46,7 @@ minu_handle_t minu_creat(minu_type_cb type,
                          uint16_t w,
                          uint16_t h);
 
-void minu_addItem(minu_handle_t me,
-                  char *name,
-                  minu_item_cb cb,
-                  void *user_data);
-
-void minu_addSubmenu(minu_handle_t me, char *item_name, minu_handle_t *menu);
+void minu_addSubmenu(minu_handle_t me, char *item_name, minu_handle_t submenu);
 void minu_addCheckBox(minu_handle_t me, char *item_name, bool *flag);
 void minu_addVariable(minu_handle_t me,
                       char *item_name,

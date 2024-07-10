@@ -12,7 +12,7 @@ typedef struct
 {
     uint16_t size;
     uint16_t capacity;
-    minu_item_t *items;
+    minu_item_t **items;
 } minu_vector_itme_t;
 
 #define VECTOR_AT(v, i)  ((v).items[i])

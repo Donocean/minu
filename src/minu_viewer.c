@@ -56,7 +56,7 @@ static state_t _handleMenu(minu_viewer_t *me, minu_event_id_t e);
 static state_t _handleItem(minu_viewer_t *me, minu_event_id_t e)
 {
     state_t status = STATUS_IGNORED;
-    minu_item_t *item  = minu_getSelectedItem(me->act_menu);
+    /* minu_item_t *item  = minu_getSelectedItem(me->act_menu); */
 
     switch ((uint8_t)e)
     {
@@ -68,7 +68,7 @@ static state_t _handleItem(minu_viewer_t *me, minu_event_id_t e)
             status = TRAN_STATE(_handleMenu);
             break;
         default:
-            item->cb(item->u.user_data, e);
+            /* item->cb(item->u.user_data, e); */
             break;
     }
 
@@ -98,12 +98,12 @@ static state_t _handleMenu(minu_viewer_t *me, minu_event_id_t e)
         case MINU_EVENT_ENTER:
             if (minu_goIn(&me->act_menu, e))
             {
-                minu_item_t *item = minu_getSelectedItem(me->act_menu);
+                /* minu_item_t *item = minu_getSelectedItem(me->act_menu); */
 
-                if (item->type == MINU_ITEM_TYPE_SUBMENU)
-                    _refresh_state(me);
-                else
-                    status = TRAN_STATE(&_handleItem);
+                /* if (item->type == MINU_ITEM_TYPE_SUBMENU) */
+                /*     _refresh_state(me); */
+                /* else */
+                /*     status = TRAN_STATE(&_handleItem); */
             }
             break;
         case MINU_EVENT_QUIT:
@@ -309,7 +309,7 @@ static void _draw_items(minu_viewer_t *me)
         minu_disp_drawStr(target.x, target.y, item->name);
 
         /* draw appendage */
-        minu_item_drawAppendage(item, );
+        /* minu_item_drawAppendage(item, ); */
     }
 }
 

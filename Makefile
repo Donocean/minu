@@ -30,6 +30,10 @@ src/minu_anim.c \
 src/minu_anim_easing.c \
 utils/minu_mem.c \
 utils/minu_vector.c \
+src/items/minu_item_checkbox.c \
+src/items/minu_item_submenu.c \
+src/items/minu_item_variable.c \
+src/items/minu_item_window.c \
 
 #######################################
 # binaries
@@ -61,6 +65,7 @@ C_INCLUDES =  \
 -Iinc \
 -Iutils \
 -Iport \
+-Isrc/items \
 
 CFLAGS += $(C_DEFS) $(C_INCLUDES) $(OPT) -Wall -fdata-sections -ffunction-sections
 
