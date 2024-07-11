@@ -10,7 +10,7 @@ void minu_vector_init(minu_vector_itme_t *const me)
 {
     me->size = 0;
     me->capacity = 1;
-    me->items = MINU_MEM_CUSTOM_ALLOC(me->capacity * sizeof(minu_item_t **));
+    me->items = MINU_MEM_CUSTOM_ALLOC(me->capacity * sizeof(minu_item_t *));
 }
 
 void minu_vector_push_back(minu_vector_itme_t *const me, minu_item_t *item)
@@ -18,7 +18,7 @@ void minu_vector_push_back(minu_vector_itme_t *const me, minu_item_t *item)
     if (me->size == me->capacity)
     {
         minu_item_t **new;
-        new = MINU_MEM_CUSTOM_ALLOC(me->capacity * 2 * sizeof(minu_item_t **));
+        new = MINU_MEM_CUSTOM_ALLOC(me->capacity * 2 * sizeof(minu_item_t *));
         assert(new != NULL);
 
         memcpy(new, me->items, sizeof(minu_item_t *) * me->size);
@@ -36,7 +36,7 @@ void minu_vector_pop_back(minu_vector_itme_t *const me)
 {
     me->size--;
     /* free the item */
-    MINU_MEM_CUSTOM_FREE(me->items[me->size - 1]);
+    MINU_MEM_CUSTOM_FREE(me->items[me->size]);
 }
 
 void minu_vector_erase(minu_vector_itme_t *const me, uint16_t index)

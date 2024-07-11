@@ -8,7 +8,10 @@ extern "C" {
 
 #include "minu_item.h"
 
-minu_item_t *minu_item_variable_new(char *name, void *var, minu_item_cb var_cb);
+minu_item_t *minu_item_variable_new(char *name,
+                                    void *var,
+                                    void (*varToString)(char *),
+                                    minu_item_cb var_cb);
 
 #ifdef __cplusplus
 }

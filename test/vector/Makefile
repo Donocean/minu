@@ -20,6 +20,7 @@ INCLUDES := -I. \
 # C source files...
 C_SRCS := \
 	minu_vector.c \
+	minu_mem.c \
 	test_vector.c \
 	et.c \
 	et_host.c

@@ -24,6 +24,7 @@ static void port_drawIcon(int16_t x,
                           uint16_t h,
                           void *icon);
 static void port_fillRect(int16_t x, int16_t y, uint16_t w, uint16_t h);
+static void port_drawRect(int16_t x, int16_t y, uint16_t w, uint16_t h);
 static void port_fillRectInDiff(int16_t x, int16_t y, int16_t w, int16_t h);
 static void port_drawHLine(int16_t x, int16_t y, uint16_t len);
 static void port_drawVLine(int16_t x, int16_t y, uint16_t len);
@@ -36,6 +37,7 @@ static minu_ops_t disp_ops = {
     .drawIcon = port_drawIcon,
     .setFontDatum = port_setFontDatum,
     .fillRect = port_fillRect,
+    .drawRect = port_drawRect,
     .fillRectInDiff = port_fillRectInDiff,
     .getStrWidth = port_getStrWidth,
     .getFontHeight = port_getFontHeight,
@@ -60,6 +62,11 @@ static void port_setWindow(int16_t x, int16_t y, uint16_t w, uint16_t h)
 static void port_fillRect(int16_t x, int16_t y, uint16_t w, uint16_t h)
 {
     u8g2_DrawBox(port_u8g2, x, y, w, h);
+}
+
+static void port_drawRect(int16_t x, int16_t y, uint16_t w, uint16_t h)
+{
+    u8g2_DrawFrame(port_u8g2, x, y, w, h);
 }
 
 static void port_fillRectInDiff(int16_t x, int16_t y, int16_t w, int16_t h)

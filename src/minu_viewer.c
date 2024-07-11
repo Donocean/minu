@@ -47,7 +47,6 @@ struct minu_viewer_t
     minu_pos_t offset;
 };
 
-
 #define TRAN_STATE(target) (me->state = (target), STATUS_TRAN)
 
 static void _refresh_state(minu_viewer_t *me);
@@ -96,14 +95,16 @@ static state_t _handleMenu(minu_viewer_t *me, minu_event_id_t e)
             minu_goNext(me->act_menu);
             break;
         case MINU_EVENT_ENTER:
-            if (minu_goIn(&me->act_menu, e))
+            switch (minu_goIn(&me->act_menu, e))
             {
-                /* minu_item_t *item = minu_getSelectedItem(me->act_menu); */
-
-                /* if (item->type == MINU_ITEM_TYPE_SUBMENU) */
-                /*     _refresh_state(me); */
-                /* else */
-                /*     status = TRAN_STATE(&_handleItem); */
+                case MINU_ITEM_STATUS_REFRESH:
+                    _refresh_state(me);
+                    break;
+                case MINU_ITEM_STATUS_TRANSFER:
+                    status = TRAN_STATE(&_handleItem);
+                    break;
+                default:
+                    break;
             }
             break;
         case MINU_EVENT_QUIT:
@@ -309,7 +310,7 @@ static void _draw_items(minu_viewer_t *me)
         minu_disp_drawStr(target.x, target.y, item->name);
 
         /* draw appendage */
-        /* minu_item_drawAppendage(item, ); */
+        minu_item_drawAppendage(item, &target);
     }
 }
 

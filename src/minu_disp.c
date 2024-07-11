@@ -33,12 +33,24 @@ void minu_disp_fillRect(int16_t x, int16_t y, uint16_t w, uint16_t h, uint32_t c
     g_ops->fillRect(x, y, w, h, color);
 }
 
+void minu_disp_drawRect(int16_t x, int16_t y, uint16_t w, uint16_t h, uint32_t color)
+{
+    assert(g_ops != NULL);
+    g_ops->drawRect(x, y, w, h, color);
+}
+
 #else
 
 void minu_disp_fillRect(int16_t x, int16_t y, uint16_t w, uint16_t h)
 {
     assert(g_ops != NULL);
     g_ops->fillRect(x, y, w, h);
+}
+
+void minu_disp_drawRect(int16_t x, int16_t y, uint16_t w, uint16_t h)
+{
+    assert(g_ops != NULL);
+    g_ops->drawRect(x, y, w, h);
 }
 
 #endif

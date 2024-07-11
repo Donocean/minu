@@ -24,18 +24,24 @@ TEST_GROUP("Basic")
         minu_item_t *new_item1 = malloc(sizeof(minu_item_t));
         minu_item_t *new_item2 = malloc(sizeof(minu_item_t));
         minu_item_t *new_item3 = malloc(sizeof(minu_item_t));
+        minu_item_t *new_item4 = malloc(sizeof(minu_item_t));
+        minu_item_t *new_item5 = malloc(sizeof(minu_item_t));
+        minu_item_t *new_item6 = malloc(sizeof(minu_item_t));
         printf("\n     item: %p\n", new_item0);
         printf("vec.items: %p\n", vec.items);
         minu_vector_push_back(&vec, new_item0);
         minu_vector_push_back(&vec, new_item1);
         minu_vector_push_back(&vec, new_item2);
         minu_vector_push_back(&vec, new_item3);
+        minu_vector_push_back(&vec, new_item4);
+        minu_vector_push_back(&vec, new_item5);
+        minu_vector_push_back(&vec, new_item6);
 
         VERIFY(vec.items[0] == new_item0);
         VERIFY(vec.items[1] == new_item1);
         VERIFY(vec.items[2] == new_item2);
         VERIFY(vec.items[3] == new_item3);
-        VERIFY(vec.size == 4);
+        VERIFY(vec.size == 7);
     }
 
     TEST("struct test")
@@ -50,7 +56,6 @@ TEST_GROUP("Basic")
         struct test *pt = &t->a;
 
         VERIFY(t == pt);
-
     }
 
 } /* TEST_GROUP() */

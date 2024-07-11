@@ -56,7 +56,8 @@ struct minu_t
  */
 static void minu_setLayoutDefault(minu_handle_t me)
 {
-    me->layout.item_gap = 2;
+    me->layout.item_vgap = 2;
+    me->layout.item_hgap = 20;
     me->layout.border_gap = 2;
     me->layout.bar_width = 5;
 }
@@ -75,8 +76,8 @@ void minu_type_selector_vertical(minu_handle_t me,
     if (item_size)
     {
         const minu_base_t *last_item_attr =
-            minu_base_getAttr(&PVECTOR_AT(vec, item_size - 1));
-        item_attr.y = last_item_attr->y + last_item_attr->h + layout->item_gap;
+            minu_base_getAttr(PVECTOR_AT(vec, item_size - 1));
+        item_attr.y = last_item_attr->y + last_item_attr->h + layout->item_vgap;
     }
     else
         item_attr.y = menu_attr->y + layout->border_gap;
@@ -102,8 +103,8 @@ void minu_type_selector_horizontal(minu_handle_t me,
     if (item_size)
     {
         const minu_base_t *last_item_attr =
-            minu_base_getAttr(&PVECTOR_AT(vec, item_size - 1));
-        item_attr.x = last_item_attr->x + last_item_attr->w + layout->item_gap;
+            minu_base_getAttr(PVECTOR_AT(vec, item_size - 1));
+        item_attr.x = last_item_attr->x + last_item_attr->w + layout->item_hgap;
     }
     else
         item_attr.x = menu_attr->x + layout->border_gap;
@@ -182,12 +183,13 @@ void minu_addCheckBox(minu_handle_t me, char *item_name, bool *flag)
 void minu_addVariable(minu_handle_t me,
                       char *item_name,
                       void *var,
+                      void (*varToString)(char *),
                       minu_item_cb var_cb)
 {
     minu_size_t str_size = {0};
     minu_item_t *new_item = NULL;
 
-    new_item = minu_item_variable_new(item_name, var, var_cb);
+    new_item = minu_item_variable_new(item_name, var, varToString, var_cb);
     if (!new_item)
         return;
 
@@ -234,38 +236,16 @@ void minu_goPrevious(minu_handle_t me)
  * @brief entry the selected item
  * @return 1: need to transfer state, otherwise no
  */
-bool minu_goIn(minu_handle_t *act_menu, uint8_t e)
+minu_item_status_t minu_goIn(minu_handle_t *act_menu, uint8_t e)
 {
     assert(VECTOR_SIZE((*act_menu)->items) != 0);
 
     uint8_t ret = false;
-    /* minu_t *me = *act_menu; */
-    /* minu_item_t *item = &VECTOR_AT(me->items, me->item_index); */
+    minu_item_t *item = VECTOR_AT((*act_menu)->items, (*act_menu)->item_index);
+    minu_item_para_t item_para = {.act_menu = act_menu, .event = e};
 
-    /* switch (item->type) */
-    /* { */
-    /*     case MINU_ITEM_TYPE_SUBMENU: */
-    /*         if (item->u.sub_menu) */
-    /*         { */
-    /*             ret = true; */
-    /*             *act_menu = item->u.sub_menu; */
-    /*         } */
-    /*         break; */
-    /*     case MINU_ITEM_TYPE_CHECKBOX: */
-    /*         { */
-    /*             bool *flag = (bool *)item->u.user_data; */
-    /*             *flag = !(*flag); */
-    /*         } */
-    /*         break; */
-    /*     case MINU_ITEM_TYPE_VARIABLE: */
-    /*     case MINU_ITEM_TYPE_WINDOW: */
-    /*         if (item->cb) */
-    /*         { */
-    /*             ret = true; */
-    /*             item->cb(item->u.user_data, e); */
-    /*         } */
-    /*         break; */
-    /* } */
+    ret = minu_item_onUpdate(item, &item_para);
+
     return ret;
 }
 
@@ -316,7 +296,7 @@ void minu_deleteItem(minu_handle_t me)
 
 void minu_setLayout(minu_handle_t me, minu_layout_t *layout)
 {
-    me->layout.item_gap = layout->item_gap;
+    me->layout.item_vgap = layout->item_vgap;
     me->layout.border_gap = layout->border_gap;
 }
 

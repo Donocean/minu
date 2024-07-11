@@ -13,7 +13,8 @@ extern "C" {
 
 typedef struct
 {
-    uint8_t item_gap;
+    uint8_t item_vgap;
+    uint8_t item_hgap;
     uint8_t border_gap;
     uint8_t bar_width;
 } minu_layout_t;
@@ -51,12 +52,13 @@ void minu_addCheckBox(minu_handle_t me, char *item_name, bool *flag);
 void minu_addVariable(minu_handle_t me,
                       char *item_name,
                       void *var,
+                      void (*varToString)(char *),
                       minu_item_cb var_cb);
 void minu_addWindow(minu_handle_t me, char *item_name, minu_item_cb win_cb);
 
 void minu_goNext(minu_handle_t me);
 void minu_goPrevious(minu_handle_t me);
-bool minu_goIn(minu_handle_t *act_menu, uint8_t e);
+minu_item_status_t minu_goIn(minu_handle_t *act_menu, uint8_t e);
 bool minu_goOut(minu_handle_t *act_menu);
 void minu_deleteItem(minu_handle_t me);
 

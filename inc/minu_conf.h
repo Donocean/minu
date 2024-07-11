@@ -24,7 +24,7 @@ extern "C" {
 #define MINU_EVENT_QUEUE_SIZE 32
 
 /*========================* MEMORY SETTINGS *=========================*/
-#define MEIU_MEM_CUSTOM
+/* #define MEIU_MEM_CUSTOM */
 
 #ifdef MEIU_MEM_CUSTOM
 /* user need to complete the macro below if MENU_MEM_CUSTOM was enabled */
@@ -37,7 +37,7 @@ extern "C" {
 #define MINU_MEM_CUSTOM_ALLOC   minu_mem_malloc
 #define MINU_MEM_CUSTOM_FREE    minu_mem_free
 
-#define MINU_MEM_TOTAL_HEAP_SIZE            ((size_t)(6 * 1024))
+#define MINU_MEM_TOTAL_HEAP_SIZE            ((size_t)(2 * 1024))
 #define MINU_MEM_ALIGNMENT                  4
 #define MINU_MEM_APPLICATION_ALLOCATED_HEAP 0
 
