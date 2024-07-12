@@ -52,13 +52,13 @@ void minu_addCheckBox(minu_handle_t me, char *item_name, bool *flag);
 void minu_addVariable(minu_handle_t me,
                       char *item_name,
                       void *var,
-                      void (*varToString)(char *),
+                      void (*varToString)(void *var, char *str),
                       minu_item_cb var_cb);
 void minu_addWindow(minu_handle_t me, char *item_name, minu_item_cb win_cb);
 
 void minu_goNext(minu_handle_t me);
 void minu_goPrevious(minu_handle_t me);
-minu_item_status_t minu_goIn(minu_handle_t *act_menu, uint8_t e);
+void minu_goIn(minu_handle_t *act_menu);
 bool minu_goOut(minu_handle_t *act_menu);
 void minu_deleteItem(minu_handle_t me);
 

@@ -10,7 +10,7 @@ extern "C" {
 
 minu_item_t *minu_item_variable_new(char *name,
                                     void *var,
-                                    void (*varToString)(char *),
+                                    void (*varToString)(void *var, char *str),
                                     minu_item_cb var_cb);
 
 #ifdef __cplusplus

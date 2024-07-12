@@ -183,7 +183,7 @@ void minu_addCheckBox(minu_handle_t me, char *item_name, bool *flag)
 void minu_addVariable(minu_handle_t me,
                       char *item_name,
                       void *var,
-                      void (*varToString)(char *),
+                      void (*varToString)(void *var, char *str),
                       minu_item_cb var_cb)
 {
     minu_size_t str_size = {0};
@@ -232,21 +232,11 @@ void minu_goPrevious(minu_handle_t me)
     }
 }
 
-/**
- * @brief entry the selected item
- * @return 1: need to transfer state, otherwise no
- */
-minu_item_status_t minu_goIn(minu_handle_t *act_menu, uint8_t e)
+void minu_goIn(minu_handle_t *act_menu)
 {
     assert(VECTOR_SIZE((*act_menu)->items) != 0);
-
-    uint8_t ret = false;
     minu_item_t *item = VECTOR_AT((*act_menu)->items, (*act_menu)->item_index);
-    minu_item_para_t item_para = {.act_menu = act_menu, .event = e};
-
-    ret = minu_item_onUpdate(item, &item_para);
-
-    return ret;
+    minu_item_onEntry(item);
 }
 
 /**

@@ -1,4 +1,6 @@
 #include "minu_item_variable.h"
+#include "esp_log.h"
+#include "minu.h"
 #include "minu_item.h"
 #include "minu_disp.h"
 #include "minu_conf.h"
@@ -12,13 +14,16 @@ struct minu_variable_t
     minu_item_t super;
     void *var;
     minu_item_cb var_cb;
-    void (*varToString)(char *str);
+    void (*varToString)(void *var, char *str);
 };
 
-static minu_item_status_t variable_onUpdate(minu_item_t *me,
-                                            minu_item_para_t *para)
+static void variable_onEntry(minu_item_t *me)
 {
-    minu_item_status_t ret = MINU_ITEM_STATUS_IGNORE;
+
+}
+
+static void variable_onHandling(minu_item_t *me, minu_item_para_t *para)
+{
     minu_variable_t *item = (minu_variable_t *)me;
 
     /* item of variable has callbakc fucntion, */
@@ -26,30 +31,36 @@ static minu_item_status_t variable_onUpdate(minu_item_t *me,
      * showing the variable */
     if (item->var_cb)
     {
-        ret = MINU_ITEM_STATUS_TRANSFER;
         item->var_cb(item->var, para->event);
     }
-
-    return ret;
 }
 
-static void variable_draw_appendage(minu_item_t *me, minu_pos_t *target)
+static void variable_draw_appendage(minu_item_t *me,
+                                    void *menu,
+                                    minu_pos_t *target)
 {
     char var_str[MINU_ITEM_NAME_SIZE];
     minu_variable_t *item = (minu_variable_t *)me;
+    const minu_base_t *menu_attr = minu_base_getAttr(menu);
+    const minu_layout_t *layout = minu_getLayout(menu);
 
-    item->varToString(var_str);
+    item->varToString(item->var, var_str);
+    uint16_t str_w = minu_disp_getStrWidth(var_str);
 
-    /* minu_disp_drawStr(); */
+    /* recalculate the variable x position in the screen */
+    target->x = menu_attr->w - str_w - layout->bar_width - layout->border_gap;
+
+    minu_disp_drawStr(target->x, target->y, var_str);
 }
 
 minu_item_t *minu_item_variable_new(char *name,
                                     void *var,
-                                    void (*varToString)(char *),
+                                    void (*varToString)(void *var, char *str),
                                     minu_item_cb var_cb)
 {
     static minu_item_ops_t ops = {
-        .onUpdate = &variable_onUpdate,
+        .onEntry = &variable_onEntry,
+        .onHandling = &variable_onHandling,
         .drawAppendage = &variable_draw_appendage,
     };
 

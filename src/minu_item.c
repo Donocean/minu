@@ -11,16 +11,22 @@ void minu_item_setName(minu_item_t *const me, char *name)
 #endif
 }
 
-minu_item_status_t minu_item_onUpdate(minu_item_t *me, minu_item_para_t *para)
+void minu_item_onEntry(minu_item_t *me)
 {
     assert(me->ops != NULL);
-    return me->ops->onUpdate(me, para);
+    return me->ops->onEntry(me);
 }
 
-void minu_item_drawAppendage(minu_item_t *me, minu_pos_t *target)
+void minu_item_onHandling(minu_item_t *me, minu_item_para_t *para)
 {
     assert(me->ops != NULL);
-    me->ops->drawAppendage(me, target);
+    return me->ops->onHandling(me, para);
+}
+
+void minu_item_drawAppendage(minu_item_t *me, void *menu, minu_pos_t *target)
+{
+    assert(me->ops != NULL);
+    me->ops->drawAppendage(me, menu, target);
 }
 
 /* static void minu_appendage_submenu(minu_item_t *me, void *data) */

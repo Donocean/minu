@@ -1,6 +1,7 @@
 #include "minu_item_submenu.h"
 #include "minu.h"
 #include "minu_item.h"
+#include "minu_disp.h"
 #include "minu_conf.h"
 #include <stdbool.h>
 #include MINU_MEM_CUSTOM_INCLUDE
@@ -12,25 +13,43 @@ struct minu_submenu_t
     minu_handle_t submenu;
 };
 
-static minu_item_status_t submenu_onUpdate(minu_item_t *me, minu_item_para_t *para)
+static void submenu_onEntry(minu_item_t *me)
 {
-    minu_item_status_t ret = MINU_ITEM_STATUS_IGNORE;
+
+}
+
+static void submenu_onHandling(minu_item_t *me, minu_item_para_t *para)
+{
     minu_submenu_t *item = (minu_submenu_t *)me;
     minu_handle_t *act_menu = (minu_handle_t *)para->act_menu;
 
     if (item->submenu)
-    {
-        ret = MINU_ITEM_STATUS_REFRESH;
         *act_menu = item->submenu;
-    }
+}
 
-    return ret;
+static void submenu_draw_appendage(minu_item_t *me,
+                                    void *menu,
+                                    minu_pos_t *target)
+{
+    const char *tag =  "->";
+    minu_submenu_t *item = (minu_submenu_t *)me;
+    const minu_base_t *menu_attr = minu_base_getAttr(menu);
+    const minu_layout_t *layout = minu_getLayout(menu);
+
+    uint16_t str_w = minu_disp_getStrWidth(tag);
+
+    /* recalculate the variable x position in the screen */
+    target->x = menu_attr->w - str_w - layout->bar_width - layout->border_gap;
+
+    minu_disp_drawStr(target->x, target->y, tag);
 }
 
 minu_item_t *minu_item_submenu_new(char *name, minu_handle_t submenu)
 {
     static minu_item_ops_t ops = {
-        .onUpdate = &submenu_onUpdate,
+        .onEntry = &submenu_onEntry,
+        .onHandling = &submenu_onHandling,
+        .drawAppendage = &submenu_draw_appendage,
     };
     minu_submenu_t *new_item = MINU_MEM_CUSTOM_ALLOC(sizeof(minu_submenu_t));
 
