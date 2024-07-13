@@ -1,4 +1,6 @@
 #include "minu_item.h"
+#include "minu_types.h"
+#include <string.h>
 #include <assert.h>
 #include <stdint.h>
 
@@ -11,16 +13,24 @@ void minu_item_setName(minu_item_t *const me, char *name)
 #endif
 }
 
-void minu_item_onEntry(minu_item_t *me)
+void minu_item_onUpdate(minu_item_t *me)
 {
     assert(me->ops != NULL);
-    return me->ops->onEntry(me);
+
+    if (me->ops->onUpdate)
+        me->ops->onUpdate(me);
 }
 
-void minu_item_onHandling(minu_item_t *me, minu_item_para_t *para)
+state_t minu_item_onEntry(minu_item_t *me, minu_item_para_t *para)
 {
     assert(me->ops != NULL);
-    return me->ops->onHandling(me, para);
+    return me->ops->onEntry(me, para);
+}
+
+void minu_item_onHandling(minu_item_t *me, minu_event_id_t e)
+{
+    assert(me->ops != NULL);
+    me->ops->onHandling(me, e);
 }
 
 void minu_item_drawAppendage(minu_item_t *me, void *menu, minu_pos_t *target)

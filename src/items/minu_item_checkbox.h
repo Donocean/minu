@@ -6,7 +6,6 @@ extern "C" {
 #endif
 
 #include "minu_item.h"
-
 #include <stdbool.h>
 
 minu_item_t *minu_item_checkbox_new(char *name, bool *var_bool);

@@ -4,6 +4,8 @@
 #include "minu_item.h"
 #include "minu_disp.h"
 #include "minu_conf.h"
+#include "minu_types.h"
+#include "minu_viewer.h"
 #include MINU_MEM_CUSTOM_INCLUDE
 
 #include <stdint.h>
@@ -17,13 +19,9 @@ struct minu_variable_t
     void (*varToString)(void *var, char *str);
 };
 
-static void variable_onEntry(minu_item_t *me)
+static state_t variable_onEntry(minu_item_t *me, minu_item_para_t *para)
 {
-
-}
-
-static void variable_onHandling(minu_item_t *me, minu_item_para_t *para)
-{
+    state_t ret = STATUS_IGNORED;
     minu_variable_t *item = (minu_variable_t *)me;
 
     /* item of variable has callbakc fucntion, */
@@ -31,8 +29,19 @@ static void variable_onHandling(minu_item_t *me, minu_item_para_t *para)
      * showing the variable */
     if (item->var_cb)
     {
+        ret = STATUS_TRAN;
         item->var_cb(item->var, para->event);
     }
+
+    return ret;
+}
+
+static void variable_onHandling(minu_item_t *me, minu_event_id_t e)
+{
+    minu_variable_t *item = (minu_variable_t *)me;
+
+    if (item->var_cb)
+        item->var_cb(item->var, e);
 }
 
 static void variable_draw_appendage(minu_item_t *me,

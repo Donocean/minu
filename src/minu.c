@@ -2,6 +2,7 @@
 #include "minu_base.h"
 #include "minu_disp.h"
 #include "minu_item.h"
+#include "minu_types.h"
 #include "minu_vector.h"
 #include <assert.h>
 #include <stdbool.h>
@@ -153,6 +154,7 @@ void minu_addSubmenu(minu_handle_t me, char *item_name, minu_handle_t submenu)
     if (!new_item)
         return;
 
+    submenu->cotainer_menu = me;
     str_size.w = minu_disp_getStrWidth(item_name);
     str_size.h = minu_disp_getFontHeight();
 
@@ -202,8 +204,22 @@ void minu_addVariable(minu_handle_t me,
     minu_vector_push_back(&me->items, new_item);
 }
 
-void minu_addWindow(minu_handle_t me, char *item_name, minu_item_cb win_cb)
+void minu_addWindow(minu_handle_t me, char *item_name, minu_base_t win, void *user_data, minu_item_cb user_cb)
 {
+    minu_size_t str_size = {0};
+    minu_item_t *new_item = NULL;
+
+    new_item = minu_item_window_new(item_name, &win, user_data, user_cb);
+    if (!new_item)
+        return;
+
+    str_size.w = minu_disp_getStrWidth(item_name);
+    str_size.h = minu_disp_getFontHeight();
+
+    /* set the base attributes of the new item */
+    me->type_cb(me, new_item, &str_size, NULL);
+
+    minu_vector_push_back(&me->items, new_item);
 }
 
 void minu_goNext(minu_handle_t me)
@@ -232,11 +248,15 @@ void minu_goPrevious(minu_handle_t me)
     }
 }
 
-void minu_goIn(minu_handle_t *act_menu)
+state_t minu_goIn(minu_handle_t *act_menu, minu_event_id_t e)
 {
     assert(VECTOR_SIZE((*act_menu)->items) != 0);
+
     minu_item_t *item = VECTOR_AT((*act_menu)->items, (*act_menu)->item_index);
-    minu_item_onEntry(item);
+    minu_item_para_t para = {act_menu, e};
+    state_t ret =  minu_item_onEntry(item, &para);
+
+    return ret;
 }
 
 /**

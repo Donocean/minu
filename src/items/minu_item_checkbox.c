@@ -5,6 +5,8 @@
 #include "minu_item.h"
 #include "minu.h"
 #include "minu_conf.h"
+#include "minu_types.h"
+#include "minu_viewer.h"
 #include MINU_MEM_CUSTOM_INCLUDE
 
 #include <stdio.h>
@@ -17,16 +19,15 @@ struct minu_checkbox_t
     bool *var_bool;
 };
 
-static void checkbox_onEntry(minu_item_t *me, minu_item_para_t *para)
+static state_t checkbox_onEntry(minu_item_t *me, minu_item_para_t *para)
 {
     minu_checkbox_t *item = (minu_checkbox_t *)me;
 
     (void)para;
-
     if (item->var_bool)
         *item->var_bool = !(*item->var_bool);
 
-    ESP_LOGI("", "b: %d", *item->var_bool);
+    return STATUS_IGNORED;
 }
 
 static void checkbox_draw_appendage(minu_item_t *me,
@@ -57,6 +58,7 @@ minu_item_t *minu_item_checkbox_new(char *name, bool *var_bool)
 {
     static minu_item_ops_t ops = {
         .onEntry = &checkbox_onEntry,
+        .onHandling = NULL,
         .drawAppendage = &checkbox_draw_appendage,
     };
     minu_checkbox_t *new_item = MINU_MEM_CUSTOM_ALLOC(sizeof(minu_checkbox_t));

@@ -13,12 +13,6 @@
 
 #include "esp_log.h"
 
-typedef enum
-{
-    STATUS_TRAN,
-    STATUS_IGNORED,
-} state_t;
-
 enum reserved_event
 {
     /* for triggering the entry action in a state */
@@ -49,7 +43,6 @@ struct minu_viewer_t
 
 #define TRAN_STATE(target) (me->state = (target), STATUS_TRAN)
 
-static void _refresh_state(minu_viewer_t *me);
 static state_t _handleMenu(minu_viewer_t *me, minu_event_id_t e);
 
 static state_t _handleItem(minu_viewer_t *me, minu_event_id_t e)
@@ -64,15 +57,10 @@ static state_t _handleItem(minu_viewer_t *me, minu_event_id_t e)
         case EVENT_STATE_EXIT:
             break;
         case MINU_EVENT_QUIT:
-            {
-                status = TRAN_STATE(_handleMenu);
-            }
+            status = TRAN_STATE(_handleMenu);
             break;
         default:
-            {
-                minu_item_para_t para = {me->act_menu, e};
-                minu_item_onHandling(item, &para);
-            }
+            minu_item_onHandling(item, e);
             break;
     }
 
@@ -100,8 +88,8 @@ static state_t _handleMenu(minu_viewer_t *me, minu_event_id_t e)
             minu_goNext(me->act_menu);
             break;
         case MINU_EVENT_ENTER:
-            minu_goIn(&me->act_menu);
-            status = TRAN_STATE(&_handleItem);
+            if (minu_goIn(&me->act_menu, e))
+                status = TRAN_STATE(&_handleItem);
             break;
         case MINU_EVENT_QUIT:
             minu_goOut(&me->act_menu);
@@ -201,14 +189,14 @@ static void _update_offsetWindow(minu_viewer_t *me)
     item_edge_x = item_attr->x + item_attr->w;
     item_edge_y = item_attr->y + item_attr->h;
 
-    if (item_edge_x > (offset.x + menu_attr->w + +menu_attr->x))
+    if (item_edge_x > (offset.x + menu_attr->w + menu_attr->x))
         offset.x = item_edge_x - menu_attr->w - menu_attr->x;
     else if ((item_attr->x - menu_attr->x) < offset.x)
         offset.x = item_attr->x - menu_attr->x - layout->border_gap;
 
-    /* `menu_attr->y` here means we need align the coordinate to the position of
-     * origin of the screen. e.g. the menu is at (x:20, y:20, w: 128-20, h:
-     * 64-20) instead of origin(x:0, y:0, w: 128, h: 64) */
+    /* `menu_attr->y` here means we need align the coordinate to origin of the
+     * screen. e.g. the menu now is at (x:20, y:20, w: 128-20, h: 64-20),
+     * instead of origin(x:0, y:0, w: 128, h: 64) */
     if (item_edge_y > (offset.y + menu_attr->h + menu_attr->y))
         offset.y = item_edge_y - menu_attr->h - menu_attr->y;
     else if ((item_attr->y - menu_attr->y) < offset.y)
@@ -312,6 +300,8 @@ static void _draw_items(minu_viewer_t *me)
 
 static void _render(minu_viewer_t *me)
 {
+    minu_item_t *item = minu_getSelectedItem(me->act_menu);
+
     _update_offsetWindow(me);
     _update_selector(me);
 
@@ -324,14 +314,12 @@ static void _render(minu_viewer_t *me)
     // draw progress bar
     _draw_progress_bar(me->act_menu);
 
+    // draw item graph updating callback function
+    if (me->state == &_handleItem)
+        minu_item_onUpdate(item);
+
     // flush buffer to the screen
     minu_disp_flush();
-}
-
-static void _refresh_state(minu_viewer_t *me)
-{
-    me->state(me, EVENT_STATE_EXIT);
-    me->state(me, EVENT_STATE_ENTRY);
 }
 
 static void _state_dispatch(minu_viewer_t *me, uint16_t e)

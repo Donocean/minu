@@ -3,6 +3,7 @@
 #include "minu_item.h"
 #include "minu_disp.h"
 #include "minu_conf.h"
+#include "minu_types.h"
 #include <stdbool.h>
 #include MINU_MEM_CUSTOM_INCLUDE
 
@@ -13,26 +14,22 @@ struct minu_submenu_t
     minu_handle_t submenu;
 };
 
-static void submenu_onEntry(minu_item_t *me)
-{
-
-}
-
-static void submenu_onHandling(minu_item_t *me, minu_item_para_t *para)
+static state_t submenu_onEntry(minu_item_t *me, minu_item_para_t *para)
 {
     minu_submenu_t *item = (minu_submenu_t *)me;
-    minu_handle_t *act_menu = (minu_handle_t *)para->act_menu;
 
+    (void)para;
     if (item->submenu)
-        *act_menu = item->submenu;
+        *para->act_menu = item->submenu;
+
+    return STATUS_IGNORED;
 }
 
 static void submenu_draw_appendage(minu_item_t *me,
                                     void *menu,
                                     minu_pos_t *target)
 {
-    const char *tag =  "->";
-    minu_submenu_t *item = (minu_submenu_t *)me;
+    char *tag =  "->";
     const minu_base_t *menu_attr = minu_base_getAttr(menu);
     const minu_layout_t *layout = minu_getLayout(menu);
 
@@ -48,7 +45,7 @@ minu_item_t *minu_item_submenu_new(char *name, minu_handle_t submenu)
 {
     static minu_item_ops_t ops = {
         .onEntry = &submenu_onEntry,
-        .onHandling = &submenu_onHandling,
+        .onHandling = NULL,
         .drawAppendage = &submenu_draw_appendage,
     };
     minu_submenu_t *new_item = MINU_MEM_CUSTOM_ALLOC(sizeof(minu_submenu_t));

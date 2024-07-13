@@ -10,6 +10,7 @@ extern "C" {
 #include <stdbool.h>
 #include "minu_item.h"
 #include "minu_vector.h"
+#include "minu_disp.h"
 
 typedef struct
 {
@@ -19,7 +20,6 @@ typedef struct
     uint8_t bar_width;
 } minu_layout_t;
 
-typedef struct minu_t *minu_handle_t;
 typedef void (*minu_type_cb)(minu_handle_t me,
                              minu_item_t *new_item,
                              minu_size_t *str_size,
@@ -54,11 +54,15 @@ void minu_addVariable(minu_handle_t me,
                       void *var,
                       void (*varToString)(void *var, char *str),
                       minu_item_cb var_cb);
-void minu_addWindow(minu_handle_t me, char *item_name, minu_item_cb win_cb);
+void minu_addWindow(minu_handle_t me,
+                    char *item_name,
+                    minu_base_t win,
+                    void *user_data,
+                    minu_item_cb user_cb);
 
 void minu_goNext(minu_handle_t me);
 void minu_goPrevious(minu_handle_t me);
-void minu_goIn(minu_handle_t *act_menu);
+state_t minu_goIn(minu_handle_t *act_menu, minu_event_id_t e);
 bool minu_goOut(minu_handle_t *act_menu);
 void minu_deleteItem(minu_handle_t me);
 
