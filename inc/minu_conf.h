@@ -19,6 +19,9 @@ extern "C" {
 #define MINU_ITEM_NAME_SIZE 32
 #endif
 
+/* enable the animation for all the target */
+#define MINU_USER_ANIMATION
+
 /*========================* ITEM NAME SETTINGS *=========================*/
 /* must be pow of 2 */
 #define MINU_EVENT_QUEUE_SIZE 32

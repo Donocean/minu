@@ -2,7 +2,7 @@
 #include "minu_conf.h"
 #include <stdint.h>
 
-static uint32_t         sys_time = 0;
+static uint32_t sys_time = 0;
 static volatile uint8_t tick_irq_flag;
 
 /**
@@ -11,8 +11,8 @@ static volatile uint8_t tick_irq_flag;
  */
 void minu_tick_inc(uint32_t tick_period)
 {
-    tick_irq_flag  = 0;
-    sys_time      += tick_period;
+    tick_irq_flag = 0;
+    sys_time += tick_period;
 }
 
 /**
@@ -23,7 +23,7 @@ uint32_t minu_tick_get(void)
 {
 #ifndef MENU_TICK_CUSTOM
 
-    /*If `lv_tick_inc` is called from an interrupt while `sys_time` is read
+    /*If `minu_tick_inc` is called from an interrupt while `sys_time` is read
      *the result might be corrupted.
      *This loop detects if `lv_tick_inc` was called while reading `sys_time`.
      *If `tick_irq_flag` was cleared in `lv_tick_inc` try to read again
@@ -32,8 +32,8 @@ uint32_t minu_tick_get(void)
     do
     {
         tick_irq_flag = 1;
-        result        = sys_time;
-    } while (!tick_irq_flag); /*Continue until see a non interrupted cycle*/
+        result = sys_time;
+    } while (!tick_irq_flag); /* Continue until see a non interrupted cycle */
 
     return result;
 #else
@@ -57,7 +57,7 @@ uint32_t minu_tick_elaps(uint32_t prev_tick)
     }
     else
     {
-        prev_tick  = UINT32_MAX - prev_tick + 1;
+        prev_tick = UINT32_MAX - prev_tick + 1;
         prev_tick += act_time;
     }
 
@@ -66,12 +66,12 @@ uint32_t minu_tick_elaps(uint32_t prev_tick)
 
 void minu_anim_init(minu_anim_t *me)
 {
-    me->time     = 0;
-    me->start    = 0;
-    me->end      = 0;
-    me->value    = 0;
+    me->time = 0;
+    me->start = 0;
+    me->end = 0;
+    me->value = 0;
     me->duration = 500;
-    me->path     = easeOutQuad;
+    me->path = easeOutQuad;
 }
 
 void minu_anim_update(minu_anim_t *me, const uint32_t currentTime)
@@ -83,8 +83,10 @@ void minu_anim_update(minu_anim_t *me, const uint32_t currentTime)
         if (time_elaps < me->duration)
         {
             // range: 0 ~ 1 -> 0 ~ maxT
-            uint32_t t_current = maxT * (1.0f * currentTime - me->time) / me->duration;
-            me->value          = (me->end - me->start) * me->path(t_current) / maxT + me->start;
+            uint32_t t_current =
+                maxT * (1.0f * currentTime - me->time) / me->duration;
+            me->value =
+                (me->end - me->start) * me->path(t_current) / maxT + me->start;
         }
         else
         {

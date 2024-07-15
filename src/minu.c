@@ -144,7 +144,7 @@ minu_handle_t minu_creat(minu_type_cb type,
     /* set menu layout */
     minu_setLayoutDefault(ret);
     /* set menu attributes */
-    minu_base_setAttr(ret, x, y, w, h);
+    minu_base_set(ret, x, y, w, h);
     /* initialize offset to 0 */
     minu_base_setPos(&ret->offset, 0, 0);
 

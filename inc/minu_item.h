@@ -45,7 +45,7 @@ struct minu_item_t
     char name[MINU_ITEM_NAME_SIZE];
 #endif
 
-    minu_item_ops_t *ops;
+    const minu_item_ops_t *ops;
 };
 
 void minu_item_setName(minu_item_t *const me, char *name);
