@@ -64,7 +64,7 @@ minu_item_t *minu_item_window_new(char *name,
                                   void *user_data,
                                   minu_item_cb user_cb)
 {
-    static minu_item_ops_t ops = {
+    const static minu_item_ops_t ops = {
         .onEntry = &window_onEntry,
         .onUpdate = &window_onUpdate,
         .onHandling = &window_onHandling,

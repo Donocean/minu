@@ -43,7 +43,7 @@ static void submenu_draw_appendage(minu_item_t *me,
 
 minu_item_t *minu_item_submenu_new(char *name, minu_handle_t submenu)
 {
-    static minu_item_ops_t ops = {
+    const static minu_item_ops_t ops = {
         .onEntry = &submenu_onEntry,
         .onHandling = NULL,
         .drawAppendage = &submenu_draw_appendage,

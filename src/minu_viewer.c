@@ -38,7 +38,6 @@ struct minu_viewer_t
 
     minu_event_t evt;
     minu_base_t selector;
-    minu_pos_t offset;
 };
 
 #define TRAN_STATE(target) (me->state = (target), STATUS_TRAN)
@@ -132,8 +131,6 @@ minu_viewer_handle_t minu_viewer_create(minu_handle_t menu)
     ret = MINU_MEM_CUSTOM_ALLOC(sizeof(minu_viewer_t));
     assert(ret != NULL);
 
-    ret->offset.x = 0;
-    ret->offset.y = 0;
     ret->act_menu = menu;
     ret->state = _handleMenu;
     ret->state(ret, EVENT_STATE_ENTRY);
@@ -173,42 +170,45 @@ static uint8_t _get_event(minu_event_t *const me)
 
 static void _update_offsetWindow(minu_viewer_t *me)
 {
-    minu_pos_t offset = {0};
+    minu_pos_t new_offset = {0};
     int16_t item_edge_x, item_edge_y;
     const minu_base_t *item_attr, *menu_attr;
+    minu_pos_t *offset = minu_getOffset(me->act_menu);
     const minu_layout_t *layout = minu_getLayout(me->act_menu);
 
     if (!minu_getSize(me->act_menu))
         return;
 
-    offset.x = me->offset.x;
-    offset.y = me->offset.y;
+    new_offset.x = offset->x;
+    new_offset.y = offset->y;
     menu_attr = minu_base_getAttr(me->act_menu);
     item_attr = minu_base_getAttr(minu_getSelectedItem(me->act_menu));
 
     item_edge_x = item_attr->x + item_attr->w;
     item_edge_y = item_attr->y + item_attr->h;
 
-    if (item_edge_x > (offset.x + menu_attr->w + menu_attr->x))
-        offset.x = item_edge_x - menu_attr->w - menu_attr->x;
-    else if ((item_attr->x - menu_attr->x) < offset.x)
-        offset.x = item_attr->x - menu_attr->x - layout->border_gap;
+    /* `menu_attr->x` here means we don't want to count it in the offset
+     * e.g. the menu now is at (x:20, y:20, w: 128-20, h: 64-20),
+     * instead of origin(x:0, y:0, w: 128, h: 64). the 20 actually
+     * is not the offset, so we need to minus it from the offset */
+    if (item_edge_x > (new_offset.x + menu_attr->w + menu_attr->x))
+        new_offset.x = item_edge_x - menu_attr->w - menu_attr->x;
+    else if ((item_attr->x - menu_attr->x) < new_offset.x)
+        new_offset.x = item_attr->x - menu_attr->x - layout->border_gap;
 
-    /* `menu_attr->y` here means we need align the coordinate to origin of the
-     * screen. e.g. the menu now is at (x:20, y:20, w: 128-20, h: 64-20),
-     * instead of origin(x:0, y:0, w: 128, h: 64) */
-    if (item_edge_y > (offset.y + menu_attr->h + menu_attr->y))
-        offset.y = item_edge_y - menu_attr->h - menu_attr->y;
-    else if ((item_attr->y - menu_attr->y) < offset.y)
-        offset.y = item_attr->y - menu_attr->y - layout->border_gap;
+    if (item_edge_y > (new_offset.y + menu_attr->h + menu_attr->y))
+        new_offset.y = item_edge_y - menu_attr->h - menu_attr->y;
+    else if ((item_attr->y - menu_attr->y) < new_offset.y)
+        new_offset.y = item_attr->y - menu_attr->y - layout->border_gap;
 
-    minu_pos_set(&me->offset, offset.x, offset.y);
+    minu_pos_set(offset, new_offset.x, new_offset.y);
 }
 
 static void _update_selector(minu_viewer_t *me)
 {
     minu_base_t tar_sel = {0};
     const minu_base_t *item_attr = NULL;
+    minu_pos_t *offset = minu_getOffset(me->act_menu);
     const minu_layout_t *layout = minu_getLayout(me->act_menu);
 
     if (!minu_getSize(me->act_menu))
@@ -218,19 +218,19 @@ static void _update_selector(minu_viewer_t *me)
 
     tar_sel.w = item_attr->w + layout->border_gap * 2;
     tar_sel.h = item_attr->h;
-    tar_sel.y = item_attr->y - me->offset.y;
-    tar_sel.x = item_attr->x - me->offset.x - layout->border_gap;
+    tar_sel.y = item_attr->y - offset->y;
+    tar_sel.x = item_attr->x - offset->x - layout->border_gap;
     minu_base_setAttrWith(&me->selector, &tar_sel);
 
     ESP_LOGI("",
              "select_x=%d, offset_x=%d, item_x=%d",
              me->selector.x,
-             me->offset.x,
+             offset->x,
              item_attr->x);
     ESP_LOGI("",
              "select_y=%d, offset_y=%d, item_y=%d\n",
              me->selector.y,
-             me->offset.y,
+             offset->y,
              item_attr->y);
 }
 
@@ -280,6 +280,7 @@ static void _draw_items(minu_viewer_t *me)
 {
     minu_item_t *item = NULL;
     minu_vector_itme_t *vec = minu_getItems(me->act_menu);
+    minu_pos_t *offset = minu_getOffset(me->act_menu);
 
     /* draw all the items in the screen */
     while (minu_vector_iter_next(vec, &item))
@@ -288,8 +289,8 @@ static void _draw_items(minu_viewer_t *me)
         const minu_base_t *item_attr;
 
         item_attr = minu_base_getAttr(item);
-        target.x = item_attr->x - me->offset.x;
-        target.y = item_attr->y - me->offset.y;
+        target.x = item_attr->x - offset->x;
+        target.y = item_attr->y - offset->y;
 
         minu_disp_drawStr(target.x, target.y, item->name);
 

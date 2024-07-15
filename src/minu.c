@@ -29,6 +29,9 @@ struct minu_t
     /* @ref marco minu type */
     minu_type_cb type_cb;
 
+    /* offset of the moving window */
+    minu_pos_t offset;
+
     int16_t item_index; /* -1 means there is nothing in the items vector */
     uint8_t is_usingAnim : 1;
     uint8_t is_loopItem  : 1;
@@ -136,11 +139,14 @@ minu_handle_t minu_creat(minu_type_cb type,
     ret->is_usingAnim = 1;
     ret->cotainer_menu = NULL;
 
+    /* initialize vector of items */
     minu_vector_init(&ret->items);
-
+    /* set menu layout */
     minu_setLayoutDefault(ret);
     /* set menu attributes */
     minu_base_setAttr(ret, x, y, w, h);
+    /* initialize offset to 0 */
+    minu_base_setPos(&ret->offset, 0, 0);
 
     return ret;
 }
@@ -204,7 +210,11 @@ void minu_addVariable(minu_handle_t me,
     minu_vector_push_back(&me->items, new_item);
 }
 
-void minu_addWindow(minu_handle_t me, char *item_name, minu_base_t win, void *user_data, minu_item_cb user_cb)
+void minu_addWindow(minu_handle_t me,
+                    char *item_name,
+                    minu_base_t win,
+                    void *user_data,
+                    minu_item_cb user_cb)
 {
     minu_size_t str_size = {0};
     minu_item_t *new_item = NULL;
@@ -254,7 +264,7 @@ state_t minu_goIn(minu_handle_t *act_menu, minu_event_id_t e)
 
     minu_item_t *item = VECTOR_AT((*act_menu)->items, (*act_menu)->item_index);
     minu_item_para_t para = {act_menu, e};
-    state_t ret =  minu_item_onEntry(item, &para);
+    state_t ret = minu_item_onEntry(item, &para);
 
     return ret;
 }
@@ -331,6 +341,11 @@ uint16_t minu_getSize(minu_handle_t me)
 int16_t minu_getIndex(minu_handle_t me)
 {
     return me->item_index;
+}
+
+minu_pos_t *minu_getOffset(minu_handle_t me)
+{
+    return &me->offset;
 }
 
 /**

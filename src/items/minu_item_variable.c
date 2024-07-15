@@ -67,7 +67,7 @@ minu_item_t *minu_item_variable_new(char *name,
                                     void (*varToString)(void *var, char *str),
                                     minu_item_cb var_cb)
 {
-    static minu_item_ops_t ops = {
+    const static minu_item_ops_t ops = {
         .onEntry = &variable_onEntry,
         .onHandling = &variable_onHandling,
         .drawAppendage = &variable_draw_appendage,

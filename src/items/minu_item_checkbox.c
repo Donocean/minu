@@ -56,7 +56,7 @@ static void checkbox_draw_appendage(minu_item_t *me,
 
 minu_item_t *minu_item_checkbox_new(char *name, bool *var_bool)
 {
-    static minu_item_ops_t ops = {
+    const static minu_item_ops_t ops = {
         .onEntry = &checkbox_onEntry,
         .onHandling = NULL,
         .drawAppendage = &checkbox_draw_appendage,
