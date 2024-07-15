@@ -140,7 +140,7 @@ minu_handle_t minu_creat(minu_type_cb type,
 
     minu_setLayoutDefault(ret);
     /* set menu attributes */
-    minu_base_setAttr(ret, x, y, w, h);
+    minu_base_set(ret, x, y, w, h);
 
     return ret;
 }
