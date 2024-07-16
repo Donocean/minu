@@ -19,23 +19,23 @@ int linear(const int t)
 int easeInQuad(const int t)
 {
     float ft = t;
-    ft       = ft / maxT;
-    ft       = ft * ft;
+    ft = ft / maxT;
+    ft = ft * ft;
     return (int)(ft * maxT);
 }
 
 int easeOutQuad(const int t)
 {
     float ft = t;
-    ft       = ft / maxT;
-    ft       = 1 - (1 - ft) * (1 - ft);
+    ft = ft / maxT;
+    ft = 1 - (1 - ft) * (1 - ft);
     return (int)(ft * maxT);
 }
 
 int easeInOutQuad(const int t)
 {
     float ft = t;
-    ft       = ft / maxT;
+    ft = ft / maxT;
     if (t < maxT / 2)
         ft = 2 * ft * ft;
     else
@@ -46,23 +46,23 @@ int easeInOutQuad(const int t)
 int easeInCubic(const int t)
 {
     float ft = t;
-    ft       = ft / maxT;
-    ft       = ft * ft * ft;
+    ft = ft / maxT;
+    ft = ft * ft * ft;
     return (int)(ft * maxT);
 }
 
 int easeOutCubic(const int t)
 {
     float ft = t;
-    ft       = ft / maxT;
-    ft       = 1 - pow(1 - ft, 3);
+    ft = ft / maxT;
+    ft = 1 - pow(1 - ft, 3);
     return (int)(ft * maxT);
 }
 
 int easeInOutCubic(const int t)
 {
     float ft = t;
-    ft       = ft / maxT;
+    ft = ft / maxT;
     if (t < maxT / 2)
         ft = 4 * ft * ft * ft;
     else
@@ -73,23 +73,23 @@ int easeInOutCubic(const int t)
 int easeInQuart(const int t)
 {
     float ft = t;
-    ft       = ft / maxT;
-    ft       = ft * ft * ft * ft;
+    ft = ft / maxT;
+    ft = ft * ft * ft * ft;
     return (int)(ft * maxT);
 }
 
 int easeOutQuart(const int t)
 {
     float ft = t;
-    ft       = ft / maxT;
-    ft       = 1 - pow(1 - ft, 4);
+    ft = ft / maxT;
+    ft = 1 - pow(1 - ft, 4);
     return (int)(ft * maxT);
 }
 
 int easeInOutQuart(const int t)
 {
     float ft = t;
-    ft       = ft / maxT;
+    ft = ft / maxT;
     if (t < maxT / 2)
         ft = 8 * ft * ft * ft * ft;
     else
@@ -100,23 +100,23 @@ int easeInOutQuart(const int t)
 int easeInQuint(const int t)
 {
     float ft = t;
-    ft       = ft / maxT;
-    ft       = ft * ft * ft * ft * ft;
+    ft = ft / maxT;
+    ft = ft * ft * ft * ft * ft;
     return (int)(ft * maxT);
 }
 
 int easeOutQuint(const int t)
 {
     float ft = t;
-    ft       = ft / maxT;
-    ft       = 1 - pow(1 - ft, 5);
+    ft = ft / maxT;
+    ft = 1 - pow(1 - ft, 5);
     return (int)(ft * maxT);
 }
 
 int easeInOutQuint(const int t)
 {
     float ft = t;
-    ft       = ft / maxT;
+    ft = ft / maxT;
     if (t < maxT / 2)
         ft = 16 * ft * ft * ft * ft * ft;
     else
@@ -127,31 +127,31 @@ int easeInOutQuint(const int t)
 int easeInSine(const int t)
 {
     float ft = t;
-    ft       = ft / maxT;
-    ft       = 1 - cos((ft * PI) / 2);
+    ft = ft / maxT;
+    ft = 1 - cos((ft * PI) / 2);
     return (int)(ft * maxT);
 }
 
 int easeOutSine(const int t)
 {
     float ft = t;
-    ft       = ft / maxT;
-    ft       = sin((ft * PI) / 2);
+    ft = ft / maxT;
+    ft = sin((ft * PI) / 2);
     return (int)(ft * maxT);
 }
 
 int easeInOutSine(const int t)
 {
     float ft = t;
-    ft       = ft / maxT;
-    ft       = -(cos(ft * PI) - 1) / 2;
+    ft = ft / maxT;
+    ft = -(cos(ft * PI) - 1) / 2;
     return (int)(ft * maxT);
 }
 
 int easeInExpo(const int t)
 {
     float ft = t;
-    ft       = ft / maxT;
+    ft = ft / maxT;
     if (t == 0)
         return 0;
     ft = pow(2, 10 * ft - 10);
@@ -161,7 +161,7 @@ int easeInExpo(const int t)
 int easeOutExpo(const int t)
 {
     float ft = t;
-    ft       = ft / maxT;
+    ft = ft / maxT;
     if (t == maxT)
         return maxT;
     ft = 1 - pow(2, -10 * ft);
@@ -171,7 +171,7 @@ int easeOutExpo(const int t)
 int easeInOutExpo(const int t)
 {
     float ft = t;
-    ft       = ft / maxT;
+    ft = ft / maxT;
     if (t == 0)
         return 0;
     if (t == maxT)
@@ -186,23 +186,23 @@ int easeInOutExpo(const int t)
 int easeInCirc(const int t)
 {
     float ft = t;
-    ft       = ft / maxT;
-    ft       = 1 - sqrt(1 - pow(ft, 2));
+    ft = ft / maxT;
+    ft = 1 - sqrt(1 - pow(ft, 2));
     return (int)(ft * maxT);
 }
 
 int easeOutCirc(const int t)
 {
     float ft = t;
-    ft       = ft / maxT;
-    ft       = sqrt(1 - pow(ft - 1, 2));
+    ft = ft / maxT;
+    ft = sqrt(1 - pow(ft - 1, 2));
     return (int)(ft * maxT);
 }
 
 int easeInOutCirc(const int t)
 {
     float ft = t;
-    ft       = ft / maxT;
+    ft = ft / maxT;
     if (t < maxT / 2)
         ft = (1 - sqrt(1 - pow(2 * ft, 2))) / 2;
     else
@@ -213,23 +213,23 @@ int easeInOutCirc(const int t)
 int easeInBack(const int t)
 {
     float ft = t;
-    ft       = ft / maxT;
-    ft       = _c3 * ft * ft * ft - _c1 * ft * ft;
+    ft = ft / maxT;
+    ft = _c3 * ft * ft * ft - _c1 * ft * ft;
     return (int)(ft * maxT);
 }
 
 int easeOutBack(const int t)
 {
     float ft = t;
-    ft       = ft / maxT;
-    ft       = 1 + _c3 * pow(ft - 1, 3) + _c1 * pow(ft - 1, 2);
+    ft = ft / maxT;
+    ft = 1 + _c3 * pow(ft - 1, 3) + _c1 * pow(ft - 1, 2);
     return (int)(ft * maxT);
 }
 
 int easeInOutBack(const int t)
 {
     float ft = t;
-    ft       = ft / maxT;
+    ft = ft / maxT;
     if (t < maxT / 2)
         ft = (pow(2 * ft, 2) * ((_c2 + 1) * 2 * ft - _c2)) / 2;
     else
@@ -240,7 +240,7 @@ int easeInOutBack(const int t)
 int easeInElastic(const int t)
 {
     float ft = t;
-    ft       = ft / maxT;
+    ft = ft / maxT;
     if (t == 0)
         return 0;
     if (t == maxT)
@@ -252,7 +252,7 @@ int easeInElastic(const int t)
 int easeOutElastic(const int t)
 {
     float ft = t;
-    ft       = ft / maxT;
+    ft = ft / maxT;
     if (t == 0)
         return 0;
     if (t == maxT)
@@ -264,7 +264,7 @@ int easeOutElastic(const int t)
 int easeInOutElastic(const int t)
 {
     float ft = t;
-    ft       = ft / maxT;
+    ft = ft / maxT;
     if (t == 0)
         return 0;
     if (t == maxT)
@@ -284,7 +284,7 @@ int easeInBounce(const int t)
 int easeOutBounce(const int t)
 {
     float ft = t;
-    ft       = ft / maxT;
+    ft = ft / maxT;
     if (ft < 1 / _d1)
         ft = _n1 * ft * ft;
     else if (ft < 2 / _d1)

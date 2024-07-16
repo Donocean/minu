@@ -7,7 +7,6 @@ extern "C" {
 
 #include <stdint.h>
 #include "minu_conf.h"
-#include "minu_anim.h"
 
 // TODO: add animation support within the base class
 typedef struct
