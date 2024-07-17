@@ -10,7 +10,7 @@ extern "C" {
 
 typedef int (*minu_easingPath_t)(const int t);
 
-// NOTE: all functions t: 0 ~ maxT
+// NOTE: all functions t: 0 ~ maxT, retval: 0 ~ maxT
 int linear(const int t);
 
 int easeInQuad(const int t);

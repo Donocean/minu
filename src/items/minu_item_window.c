@@ -46,13 +46,13 @@ static void window_draw_appendage(minu_item_t *me,
                                   minu_pos_t *target)
 {
     char *tag = "[win]";
-    const minu_base_t *menu_attr = minu_base_getAttr(menu);
+    minu_attr_t menu_attr = minu_base_getAttr(menu);
     const minu_layout_t *layout = minu_getLayout(menu);
 
     uint16_t str_w = minu_disp_getStrWidth(tag);
 
     /* recalculate the variable x position in the screen */
-    target->x = menu_attr->w - str_w - layout->bar_width - layout->border_gap;
+    target->x = menu_attr.w - str_w - layout->bar_width - layout->border_gap;
 
     minu_disp_drawStr(target->x, target->y, tag);
 }

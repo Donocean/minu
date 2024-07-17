@@ -35,22 +35,22 @@ static void checkbox_draw_appendage(minu_item_t *me,
                                     minu_pos_t *target)
 {
     minu_checkbox_t *item = (minu_checkbox_t *)me;
-    const minu_base_t *item_attr = minu_base_getAttr(me);
-    const minu_base_t *menu_attr = minu_base_getAttr(menu);
+    minu_attr_t item_attr = minu_base_getAttr(me);
+    minu_attr_t menu_attr = minu_base_getAttr(menu);
     const minu_layout_t *layout = minu_getLayout(menu);
 
     target->x =
-        menu_attr->w - layout->bar_width - item_attr->h - layout->border_gap;
+        menu_attr.w - layout->bar_width - item_attr.h - layout->border_gap;
 
-    minu_disp_drawRect(target->x, target->y, item_attr->h, item_attr->h);
+    minu_disp_drawRect(target->x, target->y, item_attr.h, item_attr.h);
 
     if (*item->var_bool)
     {
         int gap = 3;
         minu_disp_fillRect(target->x + gap,
                            target->y + gap,
-                           item_attr->h - gap * 2,
-                           item_attr->h - gap * 2);
+                           item_attr.h - gap * 2,
+                           item_attr.h - gap * 2);
     }
 }
 

@@ -11,32 +11,18 @@ extern "C" {
 
 typedef struct
 {
-    int16_t start;     /* animation's start value */
-    int16_t end;       /* animation's end value */
-    int16_t value;     /* value of the transition at the current time */
-    uint16_t duration; /* animation time in ms. must smaller than maxT */
-    uint32_t time;     /* record the system time when the animation starts */
-
-    minu_easingPath_t path;              /* animation's transition path */
-
-    void *var;                           /* variable to be animated */
-    void (*exec_cb)(void *var, int16_t); /* function to execute to animate */
+    int16_t start;    /* animation's start value */
+    int16_t end;      /* animation's end value */
+    int16_t value;    /* value of the transition at the current time */
+    int16_t duration; /* animation time in ms. must smaller than maxT */
+    uint32_t time;    /* record the system time when the animation starts */
+    minu_easingPath_t path; /* animation's transition path */
 } minu_anim_t;
 
-/* animation needs tick to perform */
+/* NOTE: animation needs tick to perform */
 uint32_t minu_tick_get(void);
 uint32_t minu_tick_elaps(uint32_t prev_tick);
 void minu_tick_inc(uint32_t tick_period);
-
-static inline void minu_anim_setStart(minu_anim_t *me, int16_t start)
-{
-    me->start = start;
-}
-
-static inline void minu_anim_setEnd(minu_anim_t *me, int16_t end)
-{
-    me->end = end;
-}
 
 static inline void minu_anim_setTarget(minu_anim_t *me,
                                        int16_t start,
@@ -44,6 +30,7 @@ static inline void minu_anim_setTarget(minu_anim_t *me,
 {
     me->start = start;
     me->end = end;
+    me->time = minu_tick_get();
 }
 
 static inline void minu_anim_setDuration(minu_anim_t *me, uint16_t duration)
@@ -55,19 +42,6 @@ static inline void minu_anim_setEasingPath(minu_anim_t *me,
                                            minu_easingPath_t path)
 {
     me->path = path;
-}
-
-static inline void minu_anim_start(minu_anim_t *me, const uint32_t currentTime)
-{
-    me->time = me->time + currentTime;
-}
-
-static inline void minu_anim_setVarCb(minu_anim_t *me,
-                                      void *var,
-                                      void (*cb)(void *, int16_t))
-{
-    me->var = var;
-    me->exec_cb = cb;
 }
 
 static inline void minu_anim_set(minu_anim_t *me,
@@ -82,13 +56,18 @@ static inline void minu_anim_set(minu_anim_t *me,
     me->path = path;
 }
 
+static inline void minu_anim_end(minu_anim_t *me)
+{
+    me->value = me->start = me->end;
+}
+
 static inline int16_t minu_anim_getValue(minu_anim_t *me)
 {
     return me->value;
 }
 
 void minu_anim_init(minu_anim_t *me);
-void minu_anim_update(minu_anim_t *me, const uint32_t currentTime);
+void minu_anim_update(minu_anim_t *me);
 
 #ifdef __cplusplus
 }

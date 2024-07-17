@@ -74,17 +74,16 @@ void minu_anim_init(minu_anim_t *me)
     me->path = easeOutQuad;
 }
 
-void minu_anim_update(minu_anim_t *me, const uint32_t currentTime)
+void minu_anim_update(minu_anim_t *me)
 {
     if (me->value != me->end)
     {
-        uint32_t time_elaps = currentTime - me->time;
+        uint32_t time_elaps = minu_tick_elaps(me->time);
 
         if (time_elaps < me->duration)
         {
-            // range: 0 ~ 1 -> 0 ~ maxT
-            uint32_t t_current =
-                maxT * (1.0f * currentTime - me->time) / me->duration;
+            // map 0 ~ 1 -> 0 ~ maxT
+            uint32_t t_current = maxT * (1.0f * time_elaps) / me->duration;
             me->value =
                 (me->end - me->start) * me->path(t_current) / maxT + me->start;
         }

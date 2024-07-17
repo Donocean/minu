@@ -33,8 +33,7 @@ struct minu_t
     minu_pos_t offset;
 
     int16_t item_index; /* -1 means there is nothing in the items vector */
-    uint8_t is_usingAnim : 1;
-    uint8_t is_loopItem  : 1;
+    uint8_t is_loopItem;
 };
 
 /**
@@ -71,26 +70,26 @@ void minu_type_selector_vertical(minu_handle_t me,
                                  minu_size_t *str_size,
                                  minu_icon_t *icon)
 {
-    minu_base_t item_attr = {0};
+    minu_attr_t item_attr = {0};
     uint16_t item_size = minu_getSize(me);
     minu_layout_t *layout = minu_getLayout(me);
     minu_vector_itme_t *vec = minu_getItems(me);
-    minu_base_t *menu_attr = minu_base_getAttr(me);
+    minu_attr_t menu_attr = minu_base_getAttr(me);
 
     if (item_size)
     {
-        const minu_base_t *last_item_attr =
+        minu_attr_t last_item_attr =
             minu_base_getAttr(PVECTOR_AT(vec, item_size - 1));
-        item_attr.y = last_item_attr->y + last_item_attr->h + layout->item_vgap;
+        item_attr.y = last_item_attr.y + last_item_attr.h + layout->item_vgap;
     }
     else
-        item_attr.y = menu_attr->y + layout->border_gap;
+        item_attr.y = menu_attr.y + layout->border_gap;
 
-    item_attr.x = menu_attr->x + layout->border_gap;
+    item_attr.x = menu_attr.x + layout->border_gap;
     item_attr.w = str_size->w;
     item_attr.h = str_size->h;
 
-    minu_base_setAttrWith(new_item, &item_attr);
+    minu_base_initWith(new_item, &item_attr);
 }
 
 void minu_type_selector_horizontal(minu_handle_t me,
@@ -98,26 +97,26 @@ void minu_type_selector_horizontal(minu_handle_t me,
                                    minu_size_t *str_size,
                                    minu_icon_t *icon)
 {
-    minu_base_t item_attr = {0};
+    minu_attr_t item_attr = {0};
     uint16_t item_size = minu_getSize(me);
     minu_layout_t *layout = minu_getLayout(me);
     minu_vector_itme_t *vec = minu_getItems(me);
-    minu_base_t *menu_attr = minu_base_getAttr(me);
+    minu_attr_t menu_attr = minu_base_getAttr(me);
 
     if (item_size)
     {
-        const minu_base_t *last_item_attr =
+        minu_attr_t last_item_attr =
             minu_base_getAttr(PVECTOR_AT(vec, item_size - 1));
-        item_attr.x = last_item_attr->x + last_item_attr->w + layout->item_hgap;
+        item_attr.x = last_item_attr.x + last_item_attr.w + layout->item_hgap;
     }
     else
-        item_attr.x = menu_attr->x + layout->border_gap;
+        item_attr.x = menu_attr.x + layout->border_gap;
 
-    item_attr.y = menu_attr->y + layout->border_gap;
+    item_attr.y = menu_attr.y + layout->border_gap;
     item_attr.w = str_size->w;
     item_attr.h = str_size->h;
 
-    minu_base_setAttrWith(new_item, &item_attr);
+    minu_base_initWith(new_item, &item_attr);
 }
 
 minu_handle_t minu_creat(minu_type_cb type,
@@ -136,7 +135,6 @@ minu_handle_t minu_creat(minu_type_cb type,
     ret->type_cb = type;
     ret->item_index = 0;
     ret->is_loopItem = 1;
-    ret->is_usingAnim = 1;
     ret->cotainer_menu = NULL;
 
     /* initialize vector of items */
@@ -144,9 +142,13 @@ minu_handle_t minu_creat(minu_type_cb type,
     /* set menu layout */
     minu_setLayoutDefault(ret);
     /* set menu attributes */
-    minu_base_set(ret, x, y, w, h);
+    minu_base_init(ret, x, y, w, h);
+#ifdef MINU_USE_ANIMATION
+    /* menu dosen't need animaton */
+    minu_base_end(ret);
+#endif
     /* initialize offset to 0 */
-    minu_base_setPos(&ret->offset, 0, 0);
+    minu_pos_init(&ret->offset, 0, 0);
 
     return ret;
 }
@@ -304,8 +306,8 @@ void minu_deleteItem(minu_handle_t me)
     for (uint16_t i = VECTOR_SIZE(me->items) - 1; i > me->item_index; i--)
     {
         minu_item_t *now = VECTOR_AT(me->items, i);
-        minu_base_t *prev_pos = minu_base_getAttr(VECTOR_AT(me->items, i - 1));
-        minu_base_setPos(now, prev_pos->x, prev_pos->y);
+        minu_attr_t prev_pos = minu_base_getAttr(VECTOR_AT(me->items, i - 1));
+        minu_base_setPos(now, prev_pos.x, prev_pos.y);
     }
 
     /* this function will modfiy vector size,

@@ -19,7 +19,7 @@ extern "C" {
 #define MINU_ITEM_NAME_SIZE 32
 #endif
 
-/* enable the animation for all the target. need 2 times space in the ram */
+/* enable the animation for all the target. it takes 2 times space in the ram */
 #define MINU_USE_ANIMATION
 
 /*========================* ITEM NAME SETTINGS *=========================*/

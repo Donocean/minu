@@ -125,9 +125,9 @@ void minu_viewer_event_post_to(minu_viewer_handle_t me, minu_event_id_t e)
 minu_viewer_handle_t minu_viewer_create(minu_handle_t menu)
 {
     minu_viewer_handle_t ret;
-    const minu_base_t *first_attr, *menu_attr;
+    minu_attr_t first_attr, menu_attr;
 
-    ESP_LOGI("", "remaining heap: %d", minu_mem_getFreeHeapSize());
+    ESP_LOGI("", "remaining heap: %d, sizeof viewer: %d", minu_mem_getFreeHeapSize(), sizeof(minu_viewer_t));
     ret = MINU_MEM_CUSTOM_ALLOC(sizeof(minu_viewer_t));
     assert(ret != NULL);
 
@@ -137,11 +137,11 @@ minu_viewer_handle_t minu_viewer_create(minu_handle_t menu)
 
     /* set selector's attribute */
     first_attr = minu_base_getAttr(minu_getSelectedItem(menu));
-    minu_base_setAttrWith(&ret->selector, (void *)first_attr);
+    minu_base_initWith(&ret->selector, &first_attr);
 
     /* restricts all graphics output to the specified range */
     menu_attr = minu_base_getAttr(menu);
-    minu_disp_setWindow(menu_attr->x, menu_attr->y, menu_attr->w, menu_attr->h);
+    minu_disp_setWindow(menu_attr.x, menu_attr.y, menu_attr.w, menu_attr.h);
 
     /* refresh the screen */
     minu_viewer_event_post_to(ret, MINU_EVENT_REFRESH);
@@ -172,7 +172,7 @@ static void _update_offsetWindow(minu_viewer_t *me)
 {
     minu_pos_t new_offset = {0};
     int16_t item_edge_x, item_edge_y;
-    const minu_base_t *item_attr, *menu_attr;
+    minu_attr_t item_attr, menu_attr;
     minu_pos_t *offset = minu_getOffset(me->act_menu);
     const minu_layout_t *layout = minu_getLayout(me->act_menu);
 
@@ -184,30 +184,29 @@ static void _update_offsetWindow(minu_viewer_t *me)
     menu_attr = minu_base_getAttr(me->act_menu);
     item_attr = minu_base_getAttr(minu_getSelectedItem(me->act_menu));
 
-    item_edge_x = item_attr->x + item_attr->w;
-    item_edge_y = item_attr->y + item_attr->h;
+    item_edge_x = item_attr.x + item_attr.w;
+    item_edge_y = item_attr.y + item_attr.h;
 
-    /* `menu_attr->x` here means we don't want to count it in the offset
+    /* `menu_attr.x` here means we don't want to count it in the offset
      * e.g. the menu now is at (x:20, y:20, w: 128-20, h: 64-20),
      * instead of origin(x:0, y:0, w: 128, h: 64). the 20 actually
      * is not the offset, so we need to minus it from the offset */
-    if (item_edge_x > (new_offset.x + menu_attr->w + menu_attr->x))
-        new_offset.x = item_edge_x - menu_attr->w - menu_attr->x;
-    else if ((item_attr->x - menu_attr->x) < new_offset.x)
-        new_offset.x = item_attr->x - menu_attr->x - layout->border_gap;
+    if (item_edge_x > (new_offset.x + menu_attr.w + menu_attr.x))
+        new_offset.x = item_edge_x - menu_attr.w - menu_attr.x;
+    else if ((item_attr.x - menu_attr.x) < new_offset.x)
+        new_offset.x = item_attr.x - menu_attr.x - layout->border_gap;
 
-    if (item_edge_y > (new_offset.y + menu_attr->h + menu_attr->y))
-        new_offset.y = item_edge_y - menu_attr->h - menu_attr->y;
-    else if ((item_attr->y - menu_attr->y) < new_offset.y)
-        new_offset.y = item_attr->y - menu_attr->y - layout->border_gap;
+    if (item_edge_y > (new_offset.y + menu_attr.h + menu_attr.y))
+        new_offset.y = item_edge_y - menu_attr.h - menu_attr.y;
+    else if ((item_attr.y - menu_attr.y) < new_offset.y)
+        new_offset.y = item_attr.y - menu_attr.y - layout->border_gap;
 
     minu_pos_set(offset, new_offset.x, new_offset.y);
 }
 
 static void _update_selector(minu_viewer_t *me)
 {
-    minu_base_t tar_sel = {0};
-    const minu_base_t *item_attr = NULL;
+    minu_attr_t item_attr, tar_sel;
     minu_pos_t *offset = minu_getOffset(me->act_menu);
     const minu_layout_t *layout = minu_getLayout(me->act_menu);
 
@@ -216,22 +215,26 @@ static void _update_selector(minu_viewer_t *me)
 
     item_attr = minu_base_getAttr(minu_getSelectedItem(me->act_menu));
 
-    tar_sel.w = item_attr->w + layout->border_gap * 2;
-    tar_sel.h = item_attr->h;
-    tar_sel.y = item_attr->y - offset->y;
-    tar_sel.x = item_attr->x - offset->x - layout->border_gap;
+    tar_sel.w = item_attr.w + layout->border_gap * 2;
+    tar_sel.h = item_attr.h;
+    tar_sel.y = item_attr.y - offset->y;
+    tar_sel.x = item_attr.x - offset->x - layout->border_gap;
     minu_base_setAttrWith(&me->selector, &tar_sel);
 
-    ESP_LOGD("",
-             "select_x=%d, offset_x=%d, item_x=%d",
+    ESP_LOGI("",
+             "select_x=%d, select_w=%d, offset_x=%d, item_x=%d, item_w=%d",
              me->selector.x,
+             me->selector.w,
              offset->x,
-             item_attr->x);
-    ESP_LOGD("",
-             "select_y=%d, offset_y=%d, item_y=%d\n",
+             item_attr.x,
+             item_attr.w);
+    ESP_LOGI("",
+             "select_y=%d, select_h=%d, offset_y=%d, item_y=%d, item_h=%d\n",
              me->selector.y,
+             me->selector.h,
              offset->y,
-             item_attr->y);
+             item_attr.y,
+             item_attr.h);
 }
 
 static void _draw_selector(minu_viewer_t *me)
@@ -244,34 +247,34 @@ static void _draw_selector(minu_viewer_t *me)
 
 static void _draw_progress_bar(minu_handle_t menu)
 {
-    const minu_base_t *menu_attr = minu_base_getAttr(menu);
-    int16_t bar_offseted_x = menu_attr->x + menu_attr->w;
+    minu_attr_t menu_attr = minu_base_getAttr(menu);
     minu_layout_t *layout = minu_getLayout(menu);
+    int16_t bar_offseted_x = menu_attr.x + menu_attr.w;
 
     // draw bar top width
     minu_disp_drawHLine(bar_offseted_x - layout->bar_width,
-                        menu_attr->y,
+                        menu_attr.y,
                         layout->bar_width);
 
     // draw bar bottom width
     minu_disp_drawHLine(bar_offseted_x - layout->bar_width,
-                        menu_attr->y + menu_attr->h - 1,
+                        menu_attr.y + menu_attr.h - 1,
                         layout->bar_width);
 
     // draw bar height
     minu_disp_drawVLine(bar_offseted_x - (layout->bar_width / 2 + 1),
-                        menu_attr->y,
-                        menu_attr->h);
+                        menu_attr.y,
+                        menu_attr.h);
 
     // items count from 0
     uint8_t item_size = minu_getSize(menu);
-    int16_t h_per_progress = item_size ? menu_attr->h / item_size : 0;
+    int16_t h_per_progress = item_size ? menu_attr.h / item_size : 0;
     int16_t progress = (minu_getIndex(menu) + 1) != item_size
                            ? (minu_getIndex(menu) + 1) * h_per_progress
-                           : menu_attr->h;
+                           : menu_attr.h;
 
     minu_disp_fillRect(bar_offseted_x - layout->bar_width,
-                       menu_attr->y,
+                       menu_attr.y,
                        layout->bar_width,
                        progress);
 }
@@ -286,11 +289,11 @@ static void _draw_items(minu_viewer_t *me)
     while (minu_vector_iter_next(vec, &item))
     {
         minu_pos_t target;
-        const minu_base_t *item_attr;
+        const minu_base_t *item_base;
 
-        item_attr = minu_base_getAttr(item);
-        target.x = item_attr->x - offset->x;
-        target.y = item_attr->y - offset->y;
+        item_base = minu_base_get(item);
+        target.x = item_base->x - offset->x;
+        target.y = item_base->y - offset->y;
 
         minu_disp_drawStr(target.x, target.y, item->name);
 
@@ -299,12 +302,36 @@ static void _draw_items(minu_viewer_t *me)
     }
 }
 
+#ifdef MINU_USE_ANIMATION
+
+static void _update_anim(minu_viewer_t *me)
+{
+    minu_item_t *item = NULL;
+    minu_pos_t *offset = minu_getOffset(me->act_menu);
+    minu_vector_itme_t *vec = minu_getItems(me->act_menu);
+
+    /* update offset animation */
+    minu_pos_update(offset);
+    /* update selector animation */
+    minu_base_update(&me->selector);
+
+    /* update items animation */
+    while (minu_vector_iter_next(vec, &item))
+        minu_base_update(item);
+}
+
+#endif /* ifdef MINU_USE_ANIMATION */
+
 static void _render(minu_viewer_t *me)
 {
     minu_item_t *item = minu_getSelectedItem(me->act_menu);
 
     _update_offsetWindow(me);
     _update_selector(me);
+
+#ifdef MINU_USE_ANIMATION
+    _update_anim(me);
+#endif
 
     /* draw items */
     _draw_items(me);
@@ -313,7 +340,7 @@ static void _render(minu_viewer_t *me)
     _draw_selector(me);
 
     // draw progress bar
-    _draw_progress_bar(me->act_menu);
+    /* _draw_progress_bar(me->act_menu); */
 
     // draw item graph updating callback function
     if (me->state == &_handleItem)
