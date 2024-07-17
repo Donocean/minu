@@ -19,8 +19,8 @@ extern "C" {
 #define MINU_ITEM_NAME_SIZE 32
 #endif
 
-/* enable the animation for all the target */
-#define MINU_USER_ANIMATION
+/* enable the animation for all the target. need 2 times space in the ram */
+#define MINU_USE_ANIMATION
 
 /*========================* ITEM NAME SETTINGS *=========================*/
 /* must be pow of 2 */
@@ -40,7 +40,7 @@ extern "C" {
 #define MINU_MEM_CUSTOM_ALLOC   minu_mem_malloc
 #define MINU_MEM_CUSTOM_FREE    minu_mem_free
 
-#define MINU_MEM_TOTAL_HEAP_SIZE            ((size_t)(2 * 1024))
+#define MINU_MEM_TOTAL_HEAP_SIZE            ((size_t)(3 * 1024))
 #define MINU_MEM_ALIGNMENT                  4
 #define MINU_MEM_APPLICATION_ALLOCATED_HEAP 0
 

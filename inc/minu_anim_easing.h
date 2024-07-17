@@ -8,7 +8,7 @@ extern "C" {
 // t: 0 ~ maxT
 #define maxT 1000
 
-typedef int (*easingPath)(const int t);
+typedef int (*minu_easingPath_t)(const int t);
 
 // NOTE: all functions t: 0 ~ maxT
 int linear(const int t);

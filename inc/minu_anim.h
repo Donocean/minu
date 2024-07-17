@@ -15,11 +15,11 @@ typedef struct
     int16_t end;       /* animation's end value */
     int16_t value;     /* value of the transition at the current time */
     uint16_t duration; /* animation time in ms. must smaller than maxT */
-
     uint32_t time;     /* record the system time when the animation starts */
-    easingPath path;   /* animation's transition path */
 
-    void *var;         /* variable to be animated */
+    minu_easingPath_t path;              /* animation's transition path */
+
+    void *var;                           /* variable to be animated */
     void (*exec_cb)(void *var, int16_t); /* function to execute to animate */
 } minu_anim_t;
 
@@ -51,7 +51,8 @@ static inline void minu_anim_setDuration(minu_anim_t *me, uint16_t duration)
     me->duration = duration;
 }
 
-static inline void minu_anim_setEasingPath(minu_anim_t *me, easingPath path)
+static inline void minu_anim_setEasingPath(minu_anim_t *me,
+                                           minu_easingPath_t path)
 {
     me->path = path;
 }
@@ -73,7 +74,7 @@ static inline void minu_anim_set(minu_anim_t *me,
                                  uint32_t start,
                                  uint32_t end,
                                  uint32_t duration,
-                                 easingPath path)
+                                 minu_easingPath_t path)
 {
     me->start = start;
     me->end = end;

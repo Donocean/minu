@@ -26,8 +26,8 @@ typedef state_t (*stateHandler)(minu_viewer_t *me, minu_event_id_t e);
 
 typedef struct
 {
-    uint8_t in;
-    uint8_t out;
+    uint16_t in;
+    uint16_t out;
     uint8_t buf[MINU_EVENT_QUEUE_SIZE]; /* @ref minu_event_id_t */
 } minu_event_t;
 
@@ -35,9 +35,8 @@ struct minu_viewer_t
 {
     stateHandler state;
     minu_handle_t act_menu;
-
-    minu_event_t evt;
     minu_base_t selector;
+    minu_event_t evt;
 };
 
 #define TRAN_STATE(target) (me->state = (target), STATUS_TRAN)
@@ -128,6 +127,7 @@ minu_viewer_handle_t minu_viewer_create(minu_handle_t menu)
     minu_viewer_handle_t ret;
     const minu_base_t *first_attr, *menu_attr;
 
+    ESP_LOGI("", "remaining heap: %d", minu_mem_getFreeHeapSize());
     ret = MINU_MEM_CUSTOM_ALLOC(sizeof(minu_viewer_t));
     assert(ret != NULL);
 
@@ -222,12 +222,12 @@ static void _update_selector(minu_viewer_t *me)
     tar_sel.x = item_attr->x - offset->x - layout->border_gap;
     minu_base_setAttrWith(&me->selector, &tar_sel);
 
-    ESP_LOGI("",
+    ESP_LOGD("",
              "select_x=%d, offset_x=%d, item_x=%d",
              me->selector.x,
              offset->x,
              item_attr->x);
-    ESP_LOGI("",
+    ESP_LOGD("",
              "select_y=%d, offset_y=%d, item_y=%d\n",
              me->selector.y,
              offset->y,
@@ -343,13 +343,11 @@ void minu_viewer_update(minu_viewer_handle_t me)
 {
     assert(me->act_menu != NULL);
 
-    uint8_t evt = _get_event(&me->evt);
-    if (evt == MINU_EVENT_NONE)
-        return;
-
-    /* for event dispatch */
-    _state_dispatch(me, evt);
-
     /* for graph */
     _render(me);
+
+    /* handle event */
+    uint8_t evt = _get_event(&me->evt);
+    if (evt != MINU_EVENT_NONE)
+        _state_dispatch(me, evt);
 }

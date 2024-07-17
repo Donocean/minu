@@ -8,9 +8,9 @@ extern "C" {
 #include "minu_item.h"
 
 minu_item_t *minu_item_window_new(char *name,
-                                  minu_base_t *win,
-                                  void *user_data,
-                                  minu_item_cb user_cb);
+                                  void (*draw_cb)(void *para),
+                                  minu_item_cb user_cb,
+                                  void *user_data);
 
 #ifdef __cplusplus
 }

@@ -7,18 +7,30 @@ extern "C" {
 
 #include <stdint.h>
 #include "minu_conf.h"
+#ifdef MINU_USE_ANIMATION
+#include "minu_anim.h"
+#endif
 
 // TODO: add animation support within the base class
 typedef struct
 {
     uint16_t x;
     uint16_t y;
+#ifdef MINU_USE_ANIMATION
+    minu_anim_t anim_x;
+    minu_anim_t anim_y;
+#endif
 } minu_pos_t;
 
 typedef struct
 {
     uint16_t w;
     uint16_t h;
+
+#ifdef MINU_USE_ANIMATION
+    minu_anim_t anim_w;
+    minu_anim_t anim_h;
+#endif
 } minu_size_t;
 
 typedef struct
@@ -27,6 +39,11 @@ typedef struct
     uint16_t y;
     uint16_t w;
     uint16_t h;
+
+#ifdef MINU_USE_ANIMATION
+    minu_anim_t anim_x;
+    minu_anim_t anim_y;
+#endif
 } minu_base_t;
 
 #define MINU_GET_SUPER(x) &((x).super)

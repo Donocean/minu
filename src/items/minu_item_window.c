@@ -10,20 +10,17 @@ typedef struct minu_window_t minu_window_t;
 struct minu_window_t
 {
     minu_item_t super;
-    void *user_data;
+    void (*draw_cb)(void *para);
     minu_item_cb user_cb;
-    minu_base_t window;
+    void *user_data;
 };
 
 static state_t window_onEntry(minu_item_t *me, minu_item_para_t *para)
 {
     minu_window_t *item = (minu_window_t *)me;
-    minu_base_t *win = &item->window;
 
     if (item->user_cb)
         item->user_cb(item->user_data, para->event);
-
-    minu_disp_fillRect(win->x, win->y, win->x, win->y);
 
     return STATUS_TRAN;
 }
@@ -39,8 +36,9 @@ static void window_onHandling(minu_item_t *me, minu_event_id_t e)
 static void window_onUpdate(minu_item_t *me)
 {
     minu_window_t *item = (minu_window_t *)me;
-    minu_base_t *win = &item->window;
-    minu_disp_fillRect(win->x, win->y, win->x, win->y);
+
+    if (item->draw_cb)
+        item->draw_cb(item->user_data);
 }
 
 static void window_draw_appendage(minu_item_t *me,
@@ -60,9 +58,9 @@ static void window_draw_appendage(minu_item_t *me,
 }
 
 minu_item_t *minu_item_window_new(char *name,
-                                  minu_base_t *win,
-                                  void *user_data,
-                                  minu_item_cb user_cb)
+                                  void (*draw_cb)(void *para),
+                                  minu_item_cb user_cb,
+                                  void *user_data)
 {
     const static minu_item_ops_t ops = {
         .onEntry = &window_onEntry,
@@ -76,10 +74,10 @@ minu_item_t *minu_item_window_new(char *name,
         return NULL;
 
     new_item->super.ops = &ops;
+    new_item->draw_cb = draw_cb;
     new_item->user_cb = user_cb;
     new_item->user_data = user_data;
     minu_item_setName(&new_item->super, name);
-    minu_base_setAttrWith(&new_item->window, win);
 
     return &new_item->super;
 }
