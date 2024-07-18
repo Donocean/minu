@@ -28,6 +28,8 @@ static void port_drawRect(int16_t x, int16_t y, uint16_t w, uint16_t h);
 static void port_fillRectInDiff(int16_t x, int16_t y, int16_t w, int16_t h);
 static void port_drawHLine(int16_t x, int16_t y, uint16_t len);
 static void port_drawVLine(int16_t x, int16_t y, uint16_t len);
+static void port_drawPixel(int16_t x, int16_t y);
+static void port_drawLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2);
 
 static u8g2_t *port_u8g2;
 static minu_ops_t disp_ops = {
@@ -44,6 +46,8 @@ static minu_ops_t disp_ops = {
     .drawHLine = port_drawHLine,
     .drawVLine = port_drawVLine,
     .setWindow = port_setWindow,
+    .drawPixel = port_drawPixel,
+    .drawLine = port_drawLine,
 };
 
 /* Note: call this function after the u8g2 has been initialized! */
@@ -52,6 +56,16 @@ void minu_port_new_disp_u8g2(void *u8g2_obj)
     port_u8g2 = u8g2_obj;
     port_setFontDatum(TL_DATUM);
     minu_disp_set(&disp_ops);
+}
+
+static void port_drawLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2)
+{
+    u8g2_DrawLine(port_u8g2, x1, y1, x2, y2);
+}
+
+static void port_drawPixel(int16_t x, int16_t y)
+{
+    u8g2_DrawPixel(port_u8g2, x, y);
 }
 
 static void port_setWindow(int16_t x, int16_t y, uint16_t w, uint16_t h)

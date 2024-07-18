@@ -9,6 +9,7 @@ extern "C" {
 typedef enum
 {
     STATUS_IGNORED,
+    STATUS_REFRESH,
     STATUS_TRAN,
 } state_t;
 
@@ -27,6 +28,8 @@ typedef enum
 } minu_event_id_t;
 
 typedef struct minu_t *minu_handle_t;
+typedef struct minu_viewer_t *minu_viewer_handle_t;
+
 
 #ifdef __cplusplus
 }

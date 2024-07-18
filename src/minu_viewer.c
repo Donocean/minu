@@ -1,8 +1,10 @@
 #include "minu_viewer.h"
 #include "minu.h"
+#include "minu_anim.h"
 #include "minu_base.h"
 #include "minu_disp.h"
 #include "minu_item.h"
+#include "minu_types.h"
 #include "minu_vector.h"
 #include <stdbool.h>
 #include MINU_MEM_CUSTOM_INCLUDE
@@ -41,7 +43,10 @@ struct minu_viewer_t
 
 #define TRAN_STATE(target) (me->state = (target), STATUS_TRAN)
 
+/* static function declaration */
+static void _reset_item_anim(minu_handle_t minu);
 static state_t _handleMenu(minu_viewer_t *me, minu_event_id_t e);
+static void minu_viewer_inOut(minu_viewer_handle_t me);
 
 static state_t _handleItem(minu_viewer_t *me, minu_event_id_t e)
 {
@@ -75,6 +80,9 @@ static state_t _handleMenu(minu_viewer_t *me, minu_event_id_t e)
     switch ((uint8_t)e)
     {
         case EVENT_STATE_ENTRY:
+            if (!minu_getIndex(me->act_menu))
+            {
+            }
             break;
         case EVENT_STATE_EXIT:
             break;
@@ -86,11 +94,17 @@ static state_t _handleMenu(minu_viewer_t *me, minu_event_id_t e)
             minu_goNext(me->act_menu);
             break;
         case MINU_EVENT_ENTER:
-            if (minu_goIn(&me->act_menu, e))
-                status = TRAN_STATE(&_handleItem);
+            {
+                state_t s = minu_goIn(&me->act_menu, e);
+                if (s == STATUS_TRAN)
+                    status = TRAN_STATE(&_handleItem);
+                else if (s == STATUS_REFRESH)
+                    minu_viewer_inOut(me);
+            }
             break;
         case MINU_EVENT_QUIT:
-            minu_goOut(&me->act_menu);
+            if (minu_goOut(&me->act_menu))
+                minu_viewer_inOut(me);
             break;
         case MINU_EVENT_DELETE:
             minu_deleteItem(me->act_menu);
@@ -101,6 +115,15 @@ static state_t _handleMenu(minu_viewer_t *me, minu_event_id_t e)
     }
 
     return status;
+}
+
+static void minu_viewer_inOut(minu_viewer_handle_t me)
+{
+    if (!minu_getIndex(me->act_menu))
+    {
+        minu_base_reset(&me->selector);
+        _reset_item_anim(me->act_menu);
+    }
 }
 
 /**
@@ -127,7 +150,10 @@ minu_viewer_handle_t minu_viewer_create(minu_handle_t menu)
     minu_viewer_handle_t ret;
     minu_attr_t first_attr, menu_attr;
 
-    ESP_LOGI("", "remaining heap: %d, sizeof viewer: %d", minu_mem_getFreeHeapSize(), sizeof(minu_viewer_t));
+    ESP_LOGI("",
+             "remaining heap: %d, sizeof viewer: %d",
+             minu_mem_getFreeHeapSize(),
+             sizeof(minu_viewer_t));
     ret = MINU_MEM_CUSTOM_ALLOC(sizeof(minu_viewer_t));
     assert(ret != NULL);
 
@@ -138,6 +164,7 @@ minu_viewer_handle_t minu_viewer_create(minu_handle_t menu)
     /* set selector's attribute */
     first_attr = minu_base_getAttr(minu_getSelectedItem(menu));
     minu_base_initWith(&ret->selector, &first_attr);
+    minu_viewer_setSelDuration(ret, 200);
 
     /* restricts all graphics output to the specified range */
     menu_attr = minu_base_getAttr(menu);
@@ -170,17 +197,15 @@ static uint8_t _get_event(minu_event_t *const me)
 
 static void _update_offsetWindow(minu_viewer_t *me)
 {
-    minu_pos_t new_offset = {0};
     int16_t item_edge_x, item_edge_y;
     minu_attr_t item_attr, menu_attr;
-    minu_pos_t *offset = minu_getOffset(me->act_menu);
+    minu_attr_t new_offset = minu_getOffTarget(me->act_menu);
+    minu_pos_t *offset_self = minu_getOffset(me->act_menu);
     const minu_layout_t *layout = minu_getLayout(me->act_menu);
 
     if (!minu_getSize(me->act_menu))
         return;
 
-    new_offset.x = offset->x;
-    new_offset.y = offset->y;
     menu_attr = minu_base_getAttr(me->act_menu);
     item_attr = minu_base_getAttr(minu_getSelectedItem(me->act_menu));
 
@@ -201,13 +226,13 @@ static void _update_offsetWindow(minu_viewer_t *me)
     else if ((item_attr.y - menu_attr.y) < new_offset.y)
         new_offset.y = item_attr.y - menu_attr.y - layout->border_gap;
 
-    minu_pos_set(offset, new_offset.x, new_offset.y);
+    minu_pos_set(offset_self, new_offset.x, new_offset.y);
 }
 
 static void _update_selector(minu_viewer_t *me)
 {
     minu_attr_t item_attr, tar_sel;
-    minu_pos_t *offset = minu_getOffset(me->act_menu);
+    minu_attr_t offset = minu_getOffTarget(me->act_menu);
     const minu_layout_t *layout = minu_getLayout(me->act_menu);
 
     if (!minu_getSize(me->act_menu))
@@ -217,24 +242,22 @@ static void _update_selector(minu_viewer_t *me)
 
     tar_sel.w = item_attr.w + layout->border_gap * 2;
     tar_sel.h = item_attr.h;
-    tar_sel.y = item_attr.y - offset->y;
-    tar_sel.x = item_attr.x - offset->x - layout->border_gap;
+    tar_sel.y = item_attr.y - offset.y;
+    tar_sel.x = item_attr.x - offset.x - layout->border_gap;
     minu_base_setAttrWith(&me->selector, &tar_sel);
 
     ESP_LOGI("",
-             "select_x=%d, select_w=%d, offset_x=%d, item_x=%d, item_w=%d",
+             "select_x=%d, select_w=%d, offset_x=%d, item_x=%d",
              me->selector.x,
              me->selector.w,
-             offset->x,
-             item_attr.x,
-             item_attr.w);
+             offset.x,
+             item_attr.x);
     ESP_LOGI("",
-             "select_y=%d, select_h=%d, offset_y=%d, item_y=%d, item_h=%d\n",
+             "select_y=%d, select_h=%d, offset_y=%d, item_y=%d\n",
              me->selector.y,
              me->selector.h,
-             offset->y,
-             item_attr.y,
-             item_attr.h);
+             offset.y,
+             item_attr.y);
 }
 
 static void _draw_selector(minu_viewer_t *me)
@@ -283,7 +306,7 @@ static void _draw_items(minu_viewer_t *me)
 {
     minu_item_t *item = NULL;
     minu_vector_itme_t *vec = minu_getItems(me->act_menu);
-    minu_pos_t *offset = minu_getOffset(me->act_menu);
+    minu_pos_t *offset_self = minu_getOffset(me->act_menu);
 
     /* draw all the items in the screen */
     while (minu_vector_iter_next(vec, &item))
@@ -292,13 +315,29 @@ static void _draw_items(minu_viewer_t *me)
         const minu_base_t *item_base;
 
         item_base = minu_base_get(item);
-        target.x = item_base->x - offset->x;
-        target.y = item_base->y - offset->y;
+        target.x = item_base->x - offset_self->x;
+        target.y = item_base->y - offset_self->y;
 
         minu_disp_drawStr(target.x, target.y, item->name);
 
         /* draw appendage */
         minu_item_drawAppendage(item, me->act_menu, &target);
+    }
+}
+
+static void _state_dispatch(minu_viewer_t *me, uint16_t e)
+{
+    assert(me->state != NULL);
+
+    state_t status;
+    stateHandler prev_state = me->state;
+
+    status = me->state(me, e);
+
+    if (status == STATUS_TRAN)
+    {
+        prev_state(me, EVENT_STATE_EXIT);
+        me->state(me, EVENT_STATE_ENTRY);
     }
 }
 
@@ -320,13 +359,38 @@ static void _update_anim(minu_viewer_t *me)
         minu_base_update(item);
 }
 
+static void _reset_item_anim(minu_handle_t minu)
+{
+    minu_item_t *item = NULL;
+    minu_vector_itme_t *vec = minu_getItems(minu);
+
+    /* update items animation */
+    while (minu_vector_iter_next(vec, &item))
+        minu_base_reset(item);
+}
+
+void minu_viewer_setSelDuration(minu_viewer_handle_t me, uint16_t duration)
+{
+    minu_anim_setDuration(&me->selector.anim_x, duration);
+    minu_anim_setDuration(&me->selector.anim_y, duration);
+    minu_anim_setDuration(&me->selector.anim_w, duration);
+    minu_anim_setDuration(&me->selector.anim_h, duration);
+}
+
+void minu_viewer_setSelAnimPath(minu_viewer_handle_t me, minu_easingPath_t pat)
+{
+    minu_anim_setEasingPath(&me->selector.anim_x, pat);
+    minu_anim_setEasingPath(&me->selector.anim_y, pat);
+    minu_anim_setEasingPath(&me->selector.anim_w, pat);
+    minu_anim_setEasingPath(&me->selector.anim_h, pat);
+}
+
 #endif /* ifdef MINU_USE_ANIMATION */
 
 static void _render(minu_viewer_t *me)
 {
     minu_item_t *item = minu_getSelectedItem(me->act_menu);
 
-    _update_offsetWindow(me);
     _update_selector(me);
 
 #ifdef MINU_USE_ANIMATION
@@ -350,22 +414,6 @@ static void _render(minu_viewer_t *me)
     minu_disp_flush();
 }
 
-static void _state_dispatch(minu_viewer_t *me, uint16_t e)
-{
-    assert(me->state != NULL);
-
-    state_t status;
-    stateHandler prev_state = me->state;
-
-    status = me->state(me, e);
-
-    if (status == STATUS_TRAN)
-    {
-        prev_state(me, EVENT_STATE_EXIT);
-        me->state(me, EVENT_STATE_ENTRY);
-    }
-}
-
 void minu_viewer_update(minu_viewer_handle_t me)
 {
     assert(me->act_menu != NULL);
@@ -376,5 +424,8 @@ void minu_viewer_update(minu_viewer_handle_t me)
     /* handle event */
     uint8_t evt = _get_event(&me->evt);
     if (evt != MINU_EVENT_NONE)
+    {
         _state_dispatch(me, evt);
+        _update_offsetWindow(me);
+    }
 }

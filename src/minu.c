@@ -352,6 +352,14 @@ minu_pos_t *minu_getOffset(minu_handle_t me)
     return &me->offset;
 }
 
+#ifdef MINU_USE_ANIMATION
+minu_attr_t minu_getOffTarget(minu_handle_t me)
+{
+    minu_attr_t tar = {me->offset.anim_x.end, me->offset.anim_y.end, 0, 0};
+    return tar;
+}
+#endif
+
 /**
  * @brief return the current selected item of minu
  */

@@ -1,6 +1,7 @@
 #ifndef __MINU_ANIM_H_
 #define __MINU_ANIM_H_
 
+#include "freertos/FreeRTOS.h"
 #include <stdlib.h>
 #ifdef __cplusplus
 extern "C" {
@@ -23,6 +24,12 @@ typedef struct
 uint32_t minu_tick_get(void);
 uint32_t minu_tick_elaps(uint32_t prev_tick);
 void minu_tick_inc(uint32_t tick_period);
+
+static inline void minu_anim_reset(minu_anim_t *me)
+{
+    me->value = 0;
+    me->time = minu_tick_get();
+}
 
 static inline void minu_anim_setTarget(minu_anim_t *me,
                                        int16_t start,

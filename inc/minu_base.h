@@ -93,6 +93,7 @@ void minu_pos_set(minu_pos_t *me, uint16_t x, uint16_t y);
 void minu_pos_update(minu_pos_t *me);
 
 void minu_base_end(void *me);
+void minu_base_reset(void *me);
 void minu_base_update(void *me);
 #endif
 

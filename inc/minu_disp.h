@@ -54,6 +54,8 @@ void minu_disp_setFont(void *font);
 void minu_disp_setFontDatum(minu_font_datum_t datum);
 void minu_disp_flush(void);
 void minu_disp_setWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h);
+void minu_disp_drawPixel(uint16_t x, uint16_t y);
+void minu_disp_drawLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2);
 
 #ifdef __cplusplus
 }

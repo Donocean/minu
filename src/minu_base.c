@@ -30,7 +30,7 @@ void minu_base_set(void *me, uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
     minu_base_t *obj = (minu_base_t *)me;
     if (x == obj->anim_x.end && y == obj->anim_y.end && w == obj->anim_w.end &&
-            h == obj->anim_h.end)
+        h == obj->anim_h.end)
         return;
 
 #ifdef MINU_USE_ANIMATION
@@ -47,8 +47,8 @@ void minu_base_setAttrWith(void *dest, minu_attr_t *src)
 {
     minu_base_t *me = (minu_base_t *)dest;
 
-    if (src->x == me->anim_x.end && src->y == me->anim_y.end && src->w == me->anim_w.end &&
-            src->h == me->anim_h.end)
+    if (src->x == me->anim_x.end && src->y == me->anim_y.end &&
+        src->w == me->anim_w.end && src->h == me->anim_h.end)
         return;
 
 #ifdef MINU_USE_ANIMATION
@@ -147,6 +147,17 @@ void minu_base_update(void *me)
     obj->y = minu_anim_getValue(&obj->anim_y);
     obj->w = minu_anim_getValue(&obj->anim_w);
     obj->h = minu_anim_getValue(&obj->anim_h);
+}
+
+void minu_base_reset(void *me)
+{
+    minu_base_t *obj = (minu_base_t *)me;
+
+    minu_anim_reset(&obj->anim_x);
+    minu_anim_reset(&obj->anim_y);
+    minu_anim_reset(&obj->anim_w);
+    minu_anim_reset(&obj->anim_h);
+    obj->x = obj->y = obj->w = obj->h = 0;
 }
 
 void minu_base_end(void *me)

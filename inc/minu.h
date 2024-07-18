@@ -73,6 +73,7 @@ minu_layout_t *minu_getLayout(minu_handle_t me);
 uint16_t minu_getSize(minu_handle_t me);
 int16_t minu_getIndex(minu_handle_t me);
 minu_pos_t *minu_getOffset(minu_handle_t me);
+minu_attr_t minu_getOffTarget(minu_handle_t me);
 minu_item_t *minu_getSelectedItem(minu_handle_t me);
 minu_vector_itme_t *minu_getItems(minu_handle_t me);
 void minu_delete(minu_handle_t me);

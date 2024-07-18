@@ -14,8 +14,16 @@ typedef struct
     /* RGB interface */
     void (*fillScreen)(uint32_t color);
     void (*setFontColor)(uint32_t color);
-    void (*fillRect)(int16_t x, int16_t y, uint16_t w, uint16_t h, uint32_t color);
-    void (*drawRect)(int16_t x, int16_t y, uint16_t w, uint16_t h, uint32_t color);
+    void (*fillRect)(int16_t x,
+                     int16_t y,
+                     uint16_t w,
+                     uint16_t h,
+                     uint32_t color);
+    void (*drawRect)(int16_t x,
+                     int16_t y,
+                     uint16_t w,
+                     uint16_t h,
+                     uint32_t color);
 #else
     /* Monochrome interface */
     void (*fillRect)(int16_t x, int16_t y, uint16_t w, uint16_t h);
@@ -28,6 +36,9 @@ typedef struct
     uint16_t (*getStrWidth)(char *str);
     void (*setFont)(void *font);
     void (*setFontDatum)(uint8_t datum);
+    void (*drawPixel)(int16_t x, int16_t y);
+
+    void (*drawLine)(int16_t x1, int16_t y1, int16_t x2, int16_t y2);
     void (*drawHLine)(int16_t x, int16_t y, uint16_t len);
     void (*drawVLine)(int16_t x, int16_t y, uint16_t len);
     void (*drawStr)(int16_t x, int16_t y, const char *str);
@@ -35,7 +46,8 @@ typedef struct
     void (*flush)(void);
 } minu_ops_t;
 
-/* Note: Please call these function after the specific UI library has been initialized! */
+/* Note: Please call these function after the specific UI library has been
+ * initialized! */
 void minu_port_new_disp_u8g2(void *u8g2_obj);
 void minu_port_new_disp_tft_espi(void *tft_obj);
 

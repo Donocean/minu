@@ -27,13 +27,21 @@ void minu_disp_setFontColor(uint32_t color)
     g_ops->setFontColor(color);
 }
 
-void minu_disp_fillRect(int16_t x, int16_t y, uint16_t w, uint16_t h, uint32_t color)
+void minu_disp_fillRect(int16_t x,
+                        int16_t y,
+                        uint16_t w,
+                        uint16_t h,
+                        uint32_t color)
 {
     assert(g_ops != NULL);
     g_ops->fillRect(x, y, w, h, color);
 }
 
-void minu_disp_drawRect(int16_t x, int16_t y, uint16_t w, uint16_t h, uint32_t color)
+void minu_disp_drawRect(int16_t x,
+                        int16_t y,
+                        uint16_t w,
+                        uint16_t h,
+                        uint32_t color)
 {
     assert(g_ops != NULL);
     g_ops->drawRect(x, y, w, h, color);
@@ -67,7 +75,11 @@ void minu_disp_drawStr(int16_t x, int16_t y, const char *str)
     g_ops->drawStr(x, y, str);
 }
 
-void minu_disp_drawIcon(int16_t x, int16_t y, uint16_t w, uint16_t h, void *icon)
+void minu_disp_drawIcon(int16_t x,
+                        int16_t y,
+                        uint16_t w,
+                        uint16_t h,
+                        void *icon)
 {
     assert(g_ops != NULL);
     g_ops->drawIcon(x, y, w, h, icon);
@@ -109,7 +121,8 @@ void minu_disp_drawVLine(int16_t x, int16_t y, uint16_t len)
     g_ops->drawVLine(x, y, len);
 }
 
-/* This function is used to send the buffer to the screen. Don't need to set it if you don't use it */
+/* This function is used to send the buffer to the screen. Don't need to set it
+ * if you don't use it */
 void minu_disp_flush(void)
 {
     assert(g_ops != NULL);
@@ -120,4 +133,16 @@ void minu_disp_setWindow(uint16_t x, uint16_t y, uint16_t w, uint16_t h)
 {
     assert(g_ops != NULL);
     return g_ops->setWindow(x, y, w, h);
+}
+
+void minu_disp_drawPixel(uint16_t x, uint16_t y)
+{
+    assert(g_ops != NULL);
+    return g_ops->drawPixel(x, y);
+}
+
+void minu_disp_drawLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2)
+{
+    assert(g_ops != NULL);
+    return g_ops->drawLine(x1, y1, x2, y2);
 }

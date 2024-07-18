@@ -22,14 +22,14 @@ static state_t submenu_onEntry(minu_item_t *me, minu_item_para_t *para)
     if (item->submenu)
         *para->act_menu = item->submenu;
 
-    return STATUS_IGNORED;
+    return STATUS_REFRESH;
 }
 
 static void submenu_draw_appendage(minu_item_t *me,
-                                    void *menu,
-                                    minu_pos_t *target)
+                                   void *menu,
+                                   minu_pos_t *target)
 {
-    char *tag =  "->";
+    char *tag = "->";
     minu_attr_t menu_attr = minu_base_getAttr(menu);
     const minu_layout_t *layout = minu_getLayout(menu);
 
