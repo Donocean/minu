@@ -48,9 +48,9 @@ void minu_port_new_disp_u8g2(void *u8g2_obj)
 static void port_drawLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2)
 {
     if (x1 == x2)
-        u8g2_DrawVLine(port_u8g2, x, y, len);
+        u8g2_DrawVLine(port_u8g2, x1, y1, y2 - y1);
     else if (y1 == y2)
-        u8g2_DrawHLine(port_u8g2, x, y, len);
+        u8g2_DrawHLine(port_u8g2, x1, y1, x2 - x1);
     else
         u8g2_DrawLine(port_u8g2, x1, y1, x2, y2);
 }

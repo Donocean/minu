@@ -101,7 +101,7 @@ void app_main(void)
     minu_disp_setFont((void *)u8g2_font_HelvetiPixel_tr);
     /* minu_disp_setFont((void *)u8g2_font_10x20_tf); // big font */
 
-    minu_handle_t m0 = minu_creat(MINU_TYPE_SELECTOR_VERTICAL, "main", 0, 0, 128, 64);
+    minu_handle_t m0 = minu_create(MINU_TYPE_SELECTOR_VERTICAL, "main", 0, 0, 128, 64);
     minu_addCheckBoxItem(m0, "check1 ", &check_test1);
     minu_addCheckBoxItem(m0, "check2", &check_test2);
     minu_addVariableItem(m0, "int", &itest, "%d", NULL);
@@ -112,7 +112,7 @@ void app_main(void)
     minu_addWindowItem(m0, "hello hi", draw_test, NULL, NULL);
     minu_addWindowItem(m0, "hi hello hi", draw_test, NULL, NULL);
 
-    minu_handle_t m1 = minu_creat(MINU_TYPE_SELECTOR_VERTICAL, "submenu", 0, 0, 128, 64);
+    minu_handle_t m1 = minu_create(MINU_TYPE_SELECTOR_VERTICAL, "submenu", 0, 0, 128, 64);
     minu_addCheckBoxItem(m1, "submenu check0", &check_test1);
     minu_addCheckBoxItem(m1, "submenu check1", &check_test1);
     minu_addCheckBoxItem(m1, "submenu check2", &check_test1);
