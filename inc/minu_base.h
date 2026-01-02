@@ -61,7 +61,7 @@ void minu_base_setSize(void *me, uint16_t w, uint16_t h);
 
 static inline minu_attr_t minu_base_getAttr(void *me)
 {
-    minu_base_t *obj = me;
+    minu_base_t *obj = (minu_base_t *)me;
     minu_attr_t ret = {0};
 
 #ifdef MINU_USE_ANIMATION

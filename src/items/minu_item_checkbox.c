@@ -10,7 +10,6 @@
 #include MINU_MEM_CUSTOM_INCLUDE
 
 #include <stdio.h>
-#include "esp_log.h"
 
 typedef struct minu_checkbox_t minu_checkbox_t;
 struct minu_checkbox_t
@@ -54,7 +53,7 @@ static void checkbox_draw_appendage(minu_item_t *me,
     }
 }
 
-minu_item_t *minu_item_checkbox_new(char *name, bool *var_bool)
+minu_item_t *minu_item_checkbox_new(const char *name, bool *var_bool)
 {
     const static minu_item_ops_t ops = {
         .onEntry = &checkbox_onEntry,

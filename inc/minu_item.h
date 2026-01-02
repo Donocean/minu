@@ -48,7 +48,7 @@ struct minu_item_t
     const minu_item_ops_t *ops;
 };
 
-void minu_item_setName(minu_item_t *const me, char *name);
+void minu_item_setName(minu_item_t *const me, const char *name);
 void minu_item_onUpdate(minu_item_t *me);
 state_t minu_item_onEntry(minu_item_t *me, minu_item_para_t *para);
 void minu_item_onHandling(minu_item_t *me, minu_event_id_t e);

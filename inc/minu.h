@@ -11,6 +11,9 @@ extern "C" {
 #include "minu_item.h"
 #include "minu_vector.h"
 #include "minu_disp.h"
+#include "minu_port.h"
+#include "minu_anim.h"
+#include "minu_viewer.h"
 
 typedef struct
 {
@@ -40,23 +43,21 @@ void minu_type_selector_horizontal(minu_handle_t me,
 #define MINU_TYPE_OPTION_VERTICAL
 #define MINU_TYPE_OPTION_HORIZONTAL
 
-minu_handle_t minu_creat(minu_type_cb type,
-                         const char *title,
-                         uint16_t x,
-                         uint16_t y,
-                         uint16_t w,
-                         uint16_t h);
-void minu_addSubmenuItem(minu_handle_t me,
-                         char *item_name,
-                         minu_handle_t submenu);
-void minu_addCheckBoxItem(minu_handle_t me, char *item_name, bool *flag);
+minu_handle_t minu_create(minu_type_cb type,
+                          const char *title,
+                          uint16_t x,
+                          uint16_t y,
+                          uint16_t w,
+                          uint16_t h);
+void minu_addSubmenuItem(minu_handle_t me, const char *item_name, minu_handle_t submenu);
+void minu_addCheckBoxItem(minu_handle_t me, const char *item_name, bool *flag);
 void minu_addVariableItem(minu_handle_t me,
-                          char *item_name,
+                          const char *item_name,
                           void *var,
-                          void (*varToString)(void *var, char *str),
+                          const char *fmt,
                           minu_item_cb var_cb);
 void minu_addWindowItem(minu_handle_t me,
-                        char *item_name,
+                        const char *item_name,
                         void (*draw_cb)(void *para),
                         minu_item_cb user_cb,
                         void *user_data);

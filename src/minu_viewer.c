@@ -13,7 +13,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include "esp_log.h"
+#include "minu_log.h"
 
 enum reserved_event
 {
@@ -150,10 +150,10 @@ minu_viewer_handle_t minu_viewer_create(minu_handle_t menu)
     minu_viewer_handle_t ret;
     minu_attr_t first_attr, menu_attr;
 
-    ESP_LOGI("",
-             "remaining heap: %d, sizeof viewer: %d",
-             minu_mem_getFreeHeapSize(),
-             sizeof(minu_viewer_t));
+    MINU_LOGI("",
+              "remaining heap: %d, sizeof viewer: %d",
+              minu_mem_getFreeHeapSize(),
+              sizeof(minu_viewer_t));
     ret = MINU_MEM_CUSTOM_ALLOC(sizeof(minu_viewer_t));
     assert(ret != NULL);
 
@@ -246,18 +246,18 @@ static void _update_selector(minu_viewer_t *me)
     tar_sel.x = item_attr.x - offset.x - layout->border_gap;
     minu_base_setAttrWith(&me->selector, &tar_sel);
 
-    ESP_LOGI("",
-             "select_x=%d, select_w=%d, offset_x=%d, item_x=%d",
-             me->selector.x,
-             me->selector.w,
-             offset.x,
-             item_attr.x);
-    ESP_LOGI("",
-             "select_y=%d, select_h=%d, offset_y=%d, item_y=%d\n",
-             me->selector.y,
-             me->selector.h,
-             offset.y,
-             item_attr.y);
+    MINU_LOGI("",
+              "select_x=%d, select_w=%d, offset_x=%d, item_x=%d",
+              me->selector.x,
+              me->selector.w,
+              offset.x,
+              item_attr.x);
+    MINU_LOGI("",
+              "select_y=%d, select_h=%d, offset_y=%d, item_y=%d\n",
+              me->selector.y,
+              me->selector.h,
+              offset.y,
+              item_attr.y);
 }
 
 static void _draw_selector(minu_viewer_t *me)
@@ -273,21 +273,18 @@ static void _draw_progress_bar(minu_handle_t menu)
     minu_attr_t menu_attr = minu_base_getAttr(menu);
     minu_layout_t *layout = minu_getLayout(menu);
     int16_t bar_offseted_x = menu_attr.x + menu_attr.w;
+    int x = bar_offseted_x - layout->bar_width;
 
     // draw bar top width
-    minu_disp_drawHLine(bar_offseted_x - layout->bar_width,
-                        menu_attr.y,
-                        layout->bar_width);
+    minu_disp_drawLine(x, menu_attr.y, x + layout->bar_width, menu_attr.y);
 
     // draw bar bottom width
-    minu_disp_drawHLine(bar_offseted_x - layout->bar_width,
-                        menu_attr.y + menu_attr.h - 1,
-                        layout->bar_width);
+    int y = menu_attr.y + menu_attr.h - 1;
+    minu_disp_drawLine(x, y, x + layout->bar_width, y);
 
     // draw bar height
-    minu_disp_drawVLine(bar_offseted_x - (layout->bar_width / 2 + 1),
-                        menu_attr.y,
-                        menu_attr.h);
+    int vx = bar_offseted_x - (layout->bar_width / 2 + 1);
+    minu_disp_drawLine(vx, menu_attr.y, vx, menu_attr.y + menu_attr.h);
 
     // items count from 0
     uint8_t item_size = minu_getSize(menu);
@@ -296,10 +293,7 @@ static void _draw_progress_bar(minu_handle_t menu)
                            ? (minu_getIndex(menu) + 1) * h_per_progress
                            : menu_attr.h;
 
-    minu_disp_fillRect(bar_offseted_x - layout->bar_width,
-                       menu_attr.y,
-                       layout->bar_width,
-                       progress);
+    minu_disp_fillRect(x, menu_attr.y, layout->bar_width, progress);
 }
 
 static void _draw_items(minu_viewer_t *me)
@@ -391,6 +385,9 @@ static void _render(minu_viewer_t *me)
 {
     minu_item_t *item = minu_getSelectedItem(me->act_menu);
 
+    /* begin to render things to the frame buffer */
+    minu_disp_beginDrawing();
+
     _update_selector(me);
 
 #ifdef MINU_USE_ANIMATION
@@ -411,7 +408,7 @@ static void _render(minu_viewer_t *me)
         minu_item_onUpdate(item);
 
     // flush buffer to the screen
-    minu_disp_flush();
+    minu_disp_endDrawing();
 }
 
 void minu_viewer_update(minu_viewer_handle_t me)

@@ -8,7 +8,7 @@ extern "C" {
 #include "minu.h"
 #include "minu_item.h"
 
-minu_item_t *minu_item_submenu_new(char *name, minu_handle_t submenu);
+minu_item_t *minu_item_submenu_new(const char *name, minu_handle_t submenu);
 
 #ifdef __cplusplus
 }

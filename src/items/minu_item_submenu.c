@@ -25,9 +25,7 @@ static state_t submenu_onEntry(minu_item_t *me, minu_item_para_t *para)
     return STATUS_REFRESH;
 }
 
-static void submenu_draw_appendage(minu_item_t *me,
-                                   void *menu,
-                                   minu_pos_t *target)
+static void submenu_draw_appendage(minu_item_t *me, void *menu, minu_pos_t *target)
 {
     char *tag = "->";
     minu_attr_t menu_attr = minu_base_getAttr(menu);
@@ -41,7 +39,7 @@ static void submenu_draw_appendage(minu_item_t *me,
     minu_disp_drawStr(target->x, target->y, tag);
 }
 
-minu_item_t *minu_item_submenu_new(char *name, minu_handle_t submenu)
+minu_item_t *minu_item_submenu_new(const char *name, minu_handle_t submenu)
 {
     const static minu_item_ops_t ops = {
         .onEntry = &submenu_onEntry,

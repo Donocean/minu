@@ -78,8 +78,7 @@ void minu_type_selector_vertical(minu_handle_t me,
 
     if (item_size)
     {
-        minu_attr_t last_item_attr =
-            minu_base_getAttr(PVECTOR_AT(vec, item_size - 1));
+        minu_attr_t last_item_attr = minu_base_getAttr(PVECTOR_AT(vec, item_size - 1));
         item_attr.y = last_item_attr.y + last_item_attr.h + layout->item_vgap;
     }
     else
@@ -105,8 +104,7 @@ void minu_type_selector_horizontal(minu_handle_t me,
 
     if (item_size)
     {
-        minu_attr_t last_item_attr =
-            minu_base_getAttr(PVECTOR_AT(vec, item_size - 1));
+        minu_attr_t last_item_attr = minu_base_getAttr(PVECTOR_AT(vec, item_size - 1));
         item_attr.x = last_item_attr.x + last_item_attr.w + layout->item_hgap;
     }
     else
@@ -119,12 +117,12 @@ void minu_type_selector_horizontal(minu_handle_t me,
     minu_base_initWith(new_item, &item_attr);
 }
 
-minu_handle_t minu_creat(minu_type_cb type,
-                         const char *title,
-                         uint16_t x,
-                         uint16_t y,
-                         uint16_t w,
-                         uint16_t h)
+minu_handle_t minu_create(minu_type_cb type,
+                          const char *title,
+                          uint16_t x,
+                          uint16_t y,
+                          uint16_t w,
+                          uint16_t h)
 {
     minu_t *ret = NULL;
 
@@ -153,9 +151,7 @@ minu_handle_t minu_creat(minu_type_cb type,
     return ret;
 }
 
-void minu_addSubmenuItem(minu_handle_t me,
-                         char *item_name,
-                         minu_handle_t submenu)
+void minu_addSubmenuItem(minu_handle_t me, const char *item_name, minu_handle_t submenu)
 {
     minu_size_t str_size = {0};
     minu_item_t *new_item = NULL;
@@ -174,7 +170,7 @@ void minu_addSubmenuItem(minu_handle_t me,
     minu_vector_push_back(&me->items, new_item);
 }
 
-void minu_addCheckBoxItem(minu_handle_t me, char *item_name, bool *flag)
+void minu_addCheckBoxItem(minu_handle_t me, const char *item_name, bool *flag)
 {
     minu_size_t str_size = {0};
     minu_item_t *new_item = NULL;
@@ -193,15 +189,15 @@ void minu_addCheckBoxItem(minu_handle_t me, char *item_name, bool *flag)
 }
 
 void minu_addVariableItem(minu_handle_t me,
-                          char *item_name,
+                          const char *item_name,
                           void *var,
-                          void (*varToString)(void *var, char *str),
+                          const char *fmt,
                           minu_item_cb var_cb)
 {
     minu_size_t str_size = {0};
     minu_item_t *new_item = NULL;
 
-    new_item = minu_item_variable_new(item_name, var, varToString, var_cb);
+    new_item = minu_item_variable_new(item_name, var, fmt, var_cb);
     if (!new_item)
         return;
 
@@ -215,7 +211,7 @@ void minu_addVariableItem(minu_handle_t me,
 }
 
 void minu_addWindowItem(minu_handle_t me,
-                        char *item_name,
+                        const char *item_name,
                         void (*draw_cb)(void *para),
                         minu_item_cb user_cb,
                         void *user_data)

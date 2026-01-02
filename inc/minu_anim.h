@@ -1,13 +1,12 @@
 #ifndef __MINU_ANIM_H_
 #define __MINU_ANIM_H_
 
-#include "freertos/FreeRTOS.h"
-#include <stdlib.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include <stdint.h>
+#include <stdlib.h>
 #include "minu_anim_easing.h"
 
 typedef struct

@@ -5,11 +5,6 @@
 extern "C" {
 #endif
 
-/*========================* SCREEN TYPE SETTINGS *=========================*/
-/* chose your color gamut by uncomment the macro below */
-/* #define MINU_DISPLAY_USE_RGB */
-#define MINU_DISPLAY_USE_MONO
-
 /*========================* ITEM NAME SETTINGS *=========================*/
 /* save space in ram but can't modify item's name */
 // #define MINU_ITEM_USING_CONST_NAME
@@ -40,7 +35,7 @@ extern "C" {
 #define MINU_MEM_CUSTOM_ALLOC   minu_mem_malloc
 #define MINU_MEM_CUSTOM_FREE    minu_mem_free
 
-#define MINU_MEM_TOTAL_HEAP_SIZE            ((size_t)(3 * 1024))
+#define MINU_MEM_TOTAL_HEAP_SIZE            ((size_t)(10 * 1024))
 #define MINU_MEM_ALIGNMENT                  4
 #define MINU_MEM_APPLICATION_ALLOCATED_HEAP 0
 

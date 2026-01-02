@@ -57,7 +57,7 @@ static void window_draw_appendage(minu_item_t *me,
     minu_disp_drawStr(target->x, target->y, tag);
 }
 
-minu_item_t *minu_item_window_new(char *name,
+minu_item_t *minu_item_window_new(const char *name,
                                   void (*draw_cb)(void *para),
                                   minu_item_cb user_cb,
                                   void *user_data)

@@ -4,7 +4,7 @@
 #include <assert.h>
 #include <stdint.h>
 
-void minu_item_setName(minu_item_t *const me, char *name)
+void minu_item_setName(minu_item_t *const me, const char *name)
 {
 #ifdef MINU_ITEM_USING_CONST_NAME
     me->name = name;
