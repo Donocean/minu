@@ -32,8 +32,8 @@ typedef struct
 /* Note: Please call these function after the specific UI library has been
  * initialized! */
 void minu_port_new_disp_u8g2(void *u8g2_obj);
-void minu_port_new_disp_raylib(void *raylib_obj);
-void minu_port_new_disp_tft_espi(void *tft_obj);
+void minu_port_new_disp_raylib(int32_t hor_res, int32_t ver_res);
+void minu_port_new_disp_tft_espi(int32_t hor_res, int32_t ver_res);
 
 #ifdef __cplusplus
 }

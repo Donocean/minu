@@ -86,15 +86,14 @@ static const char *fragCode =
     "}";
 
 /* Note: call this function after the u8g2 has been initialized! */
-void minu_port_new_disp_raylib(void *raylib_obj)
+void minu_port_new_disp_raylib(int32_t hor_res, int32_t ver_res)
 {
-    int *size = (int *)raylib_obj;
-    InitWindow(size[0], size[1], "minu");
+    InitWindow(hor_res, ver_res, "minu");
     SetTargetFPS(60);
     g_font = GetFontDefault();
     /* g_fontSize = g_font.baseSize; */
     printf("font_size: %d", g_fontSize);
-    frameBuf = LoadRenderTexture(size[0], size[1]);
+    frameBuf = LoadRenderTexture(hor_res, ver_res);
 
     minu_disp_set(&disp_ops);
 }
